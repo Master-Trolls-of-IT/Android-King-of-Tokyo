@@ -1,40 +1,37 @@
 package com.example.kingoftokyo.ui.login
 
+import CharacterAdapter
+import PlayerCharacter
 import android.os.Bundle
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
-
 class LoginActivity : AppCompatActivity() {
     private lateinit var viewModel: LoginViewModel
 
+    var character = listOf<PlayerCharacter>()
+    val characterAdapter = CharacterAdapter(character)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
         // Initialisez le ViewModel
-        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
+        viewModel = LoginViewModel()
 
         // Lier le ViewModel à la vue
         val characterRecyclerView = findViewById<RecyclerView>(R.id.characterRecyclerView)
+        characterRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         val playerNameEditText = findViewById<EditText>(R.id.playerNameEditText)
-
-        // Observer les LiveData pour mettre à jour l'interface utilisateur
-        viewModel.characters.observe(this) { characters ->
-            // Mettez à jour la liste de personnages dans votre RecyclerView
-        }
-
-        viewModel.playerName.observe(this, { playerName ->
-            // Mettez à jour le champ de nom du joueur
-        })
-
-        // Chargez les personnages
+        characterRecyclerView.adapter = characterAdapter
         viewModel.loadCharacters()
+        character = viewModel.characters.value!!
+        characterAdapter.updateCharacter(character)
 
-        // Écoutez les changements dans le champ de nom du joueur et mettez à jour le ViewModel lorsque cela change.
+       characterAdapter.notifyDataSetChanged()
         playerNameEditText.addTextChangedListener { text ->
             viewModel.setPlayerName(text.toString())
         }

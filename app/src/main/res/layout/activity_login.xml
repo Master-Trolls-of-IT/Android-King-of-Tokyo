@@ -11,6 +11,8 @@
         android:id="@+id/characterRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:minHeight="400dp"
         app:layout_constraintBottom_toTopOf="@+id/playerNameEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -27,23 +29,12 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/characterRecyclerView"
-        android:inputType="TODO"
-        android:autofillHints=""
         tools:ignore="VisualLintTextFieldSize" />
-
-    <Spinner
-        android:id="@+id/characterSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="48dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/playerNameEditText" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/characterSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/playerNameEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:text="Jouer"

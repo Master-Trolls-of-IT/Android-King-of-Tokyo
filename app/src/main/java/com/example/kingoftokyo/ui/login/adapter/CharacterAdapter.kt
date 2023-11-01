@@ -1,12 +1,13 @@
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
 
-class CharacterAdapter : RecyclerView.Adapter<CharacterAdapter.CharacterViewHolder>() {
+class CharacterAdapter(private var characters: List<PlayerCharacter>) : RecyclerView.Adapter<CharacterAdapter.CharacterViewHolder>() {
 
-    private val characters: List<PlayerCharacter> = listOf(/* Liste des personnages */)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_character, parent, false)
@@ -15,7 +16,8 @@ class CharacterAdapter : RecyclerView.Adapter<CharacterAdapter.CharacterViewHold
 
     override fun onBindViewHolder(holder: CharacterViewHolder, position: Int) {
         val character = characters[position]
-        // Associez les données du personnage à la vue (ex. image, nom, etc.)
+        holder.characterNameTextView.text = character.name
+        holder.characterImageView.setImageResource(character.characterImageResId)
     }
 
     override fun getItemCount(): Int {
@@ -23,6 +25,11 @@ class CharacterAdapter : RecyclerView.Adapter<CharacterAdapter.CharacterViewHold
     }
 
     inner class CharacterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Références aux éléments de la vue à l'intérieur de chaque élément de la liste
+        val characterNameTextView: TextView = itemView.findViewById(R.id.characterName)
+        val characterImageView: ImageView = itemView.findViewById(R.id.characterImage)
+    }
+
+    fun updateCharacter(newCharacters: List<PlayerCharacter>) {
+        characters = newCharacters
     }
 }
