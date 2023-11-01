@@ -8,9 +8,9 @@ import com.example.kingoftokyo.R
 
 class CharacterAdapter(private var characters: List<PlayerCharacter>) : RecyclerView.Adapter<CharacterAdapter.CharacterViewHolder>() {
 
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_character, parent, false)
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_character, parent, false)
         return CharacterViewHolder(itemView)
     }
 

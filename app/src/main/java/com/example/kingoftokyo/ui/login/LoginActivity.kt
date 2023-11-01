@@ -1,5 +1,4 @@
 package com.example.kingoftokyo.ui.login
-
 import CharacterAdapter
 import PlayerCharacter
 import android.os.Bundle
