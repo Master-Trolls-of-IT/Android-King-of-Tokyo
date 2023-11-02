@@ -1,3 +1,6 @@
+package com.example.kingoftokyo.ui.login.adapter
+
+import PlayerCharacter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -6,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
 
-class CharacterAdapter(private var characters: List<PlayerCharacter>) : RecyclerView.Adapter<CharacterAdapter.CharacterViewHolder>() {
+class CharacterAdapter(private var characters: List<PlayerCharacter>, private val characterClickListener: CharacterClickListener) : RecyclerView.Adapter<CharacterAdapter.CharacterViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CharacterViewHolder {
         val itemView =
@@ -18,7 +21,12 @@ class CharacterAdapter(private var characters: List<PlayerCharacter>) : Recycler
         val character = characters[position]
         holder.characterNameTextView.text = character.name
         holder.characterImageView.setImageResource(character.characterImageResId)
+
+        holder.itemView.setOnClickListener {
+            characterClickListener.onCharacterClicked(characters[position])
+        }
     }
+
 
     override fun getItemCount(): Int {
         return characters.size
@@ -31,5 +39,9 @@ class CharacterAdapter(private var characters: List<PlayerCharacter>) : Recycler
 
     fun updateCharacter(newCharacters: List<PlayerCharacter>) {
         characters = newCharacters
+    }
+
+    interface CharacterClickListener {
+        fun onCharacterClicked(character: PlayerCharacter)
     }
 }
