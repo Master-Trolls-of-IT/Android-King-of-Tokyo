@@ -8,3 +8,11 @@ data class Player(
     val name: String,
     val selectedCharacter: PlayerCharacter
 )
+
+data class PlayerModel(
+    val name: String,
+    val id: Int,
+    val characterImageResId: Int,
+    val victoryPoints: Int,
+    val healthPoints: Int
+)
