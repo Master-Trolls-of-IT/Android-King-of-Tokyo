@@ -18,9 +18,10 @@ class LoginActivity : AppCompatActivity(), CharacterAdapter.CharacterClickListen
     private lateinit var viewModel: LoginViewModel
     private lateinit var characterAdapter: CharacterAdapter
     private var lastClickedCharacter: PlayerCharacter? = null // Variable pour stocker le dernier personnage cliqué
-    private var playerName: String = ""
+    private var playerName: String = "" // Nom par défaut du joueur
+    private val defaultCharacter = PlayerCharacter(0, "Croco Feroce", R.drawable.croco) // Personnage par défaut
 
-    @SuppressLint("CutPasteId")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -31,7 +32,7 @@ class LoginActivity : AppCompatActivity(), CharacterAdapter.CharacterClickListen
         // Bind the ViewModel to the view
         val characterRecyclerView = findViewById<RecyclerView>(R.id.characterRecyclerView)
         val playerNameEditText = findViewById<EditText>(R.id.playerNameEditText)
-        val playButton = findViewById<Button>(R.id.playButton) // Référence au bouton "Jouer"
+        val playButton = findViewById<Button>(R.id.playButton)
 
 
         // Set up the RecyclerView and CharacterAdapter
@@ -40,9 +41,9 @@ class LoginActivity : AppCompatActivity(), CharacterAdapter.CharacterClickListen
         characterRecyclerView.adapter = characterAdapter
 
         // Observe the LiveData in the ViewModel and update the adapter when data changes
-        viewModel.characters.observe(this, { characters ->
+        viewModel.characters.observe(this) { characters ->
             characterAdapter.updateCharacter(characters)
-        })
+        }
 
         // Load the characters from ViewModel
         viewModel.loadCharacters()
@@ -52,7 +53,27 @@ class LoginActivity : AppCompatActivity(), CharacterAdapter.CharacterClickListen
         }
 
         playButton.setOnClickListener {
-            playerName = playerNameEditText.text.toString()
+            // TODO: Pass the player name and selected character to the next activity
+
+            val enteredName = playerNameEditText.text.toString()
+
+            // Si le nom du joueur est vide et qu'aucun personnage n'a été sélectionné, on attribue le nom par défaut au joueur
+            if (enteredName.isEmpty() && lastClickedCharacter == null) {
+                playerName = "Player 1"
+            }
+            else if (enteredName.isEmpty() && lastClickedCharacter != null) {
+                playerName = lastClickedCharacter?.name.toString()
+            }
+            else if (enteredName.isNotEmpty()) {
+                playerName = enteredName
+            }
+
+            // check si un personnage a été sélectionné, sinon on attribue le personnage par défaut
+            if( lastClickedCharacter == null) {
+                lastClickedCharacter = defaultCharacter
+            }
+
+            Log.d("Debug", "Personnage sélectionné : ${lastClickedCharacter!!.name}")
             Log.d("Debug", "Nom du joueur : $playerName")
         }
     }
