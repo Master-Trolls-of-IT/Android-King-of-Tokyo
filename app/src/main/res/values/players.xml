@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/values/players.xml -->
+<resources>
+    <string-array name="predefined_players">
+        <item>1, Croco Feroce, @drawable/croco</item>
+        <item>2, Coiin Coin, @drawable/duck</item>
+        <item>3, Lapin enragé, @drawable/rabbit</item>
+        <item>4, Loup méchant, @drawable/wolf</item>
+    </string-array>
+</resources>
