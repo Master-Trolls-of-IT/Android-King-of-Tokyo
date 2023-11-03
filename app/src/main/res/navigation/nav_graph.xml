@@ -3,16 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginActivity">
-
-    <activity
-        android:id="@+id/loginActivity"
-        android:name="com.example.kingoftokyo.ui.login.LoginActivity"
-        android:label="activity_login"
-        tools:layout="@layout/activity_login" />
-
-    <activity
-        android:id="@+id/gameActivity"
-        android:name="com.example.kingoftokyo.ui.game.GameActivity"
-        android:label="GameActivity" />
+    app:startDestination="@id/loginFragment2">
+    <fragment
+        android:id="@+id/loginFragment2"
+        android:name="com.example.kingoftokyo.ui.login.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment2_to_gameFragment2"
+            app:destination="@id/gameFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameFragment2"
+        android:name="com.example.kingoftokyo.ui.game.GameFragment"
+        android:label="fragment_game"
+        tools:layout="@layout/fragment_game" />
 </navigation>
