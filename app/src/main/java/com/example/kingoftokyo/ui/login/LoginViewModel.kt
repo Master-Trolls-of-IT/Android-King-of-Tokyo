@@ -1,11 +1,13 @@
 package com.example.kingoftokyo.ui.login
 import PlayerCharacter
+import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.kingoftokyo.R
+import com.example.kingoftokyo.boilerplate.getPredifinedPlayerCharacter
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(private var view: View) : ViewModel() {
     // LiveData pour les personnages disponibles
 
     private var _characters = MutableLiveData<List<PlayerCharacter>>()
@@ -19,14 +21,7 @@ class LoginViewModel : ViewModel() {
     // Méthode pour initialiser les données des personnages
 
     fun loadCharacters(){
-        val charactersList = listOf(
-            PlayerCharacter(1, "Croco Feroce", R.drawable.croco),
-            PlayerCharacter(2, "Coiin Coin", R.drawable.duck),
-            PlayerCharacter(3, "Lapin enragé", R.drawable.rabbit),
-            PlayerCharacter(4, "Loup méchant", R.drawable.wolf),
-
-            // Ajoutez les autres personnages
-        )
+        val charactersList = getPredifinedPlayerCharacter(view)
         _characters.value = charactersList
     }
 

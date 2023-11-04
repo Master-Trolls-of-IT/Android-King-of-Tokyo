@@ -35,4 +35,9 @@ class OpponentAdapter(private var opponents: List<PlayerModel>) : RecyclerView.A
         val opponentHPView: TextView = itemView.findViewById(R.id.gameboardCharacterCardHP)
         val opponentVPView: TextView = itemView.findViewById(R.id.gameboardCharacterCardVP)
     }
+
+    fun updateOpponents(newOpponents: List<PlayerModel>) {
+        opponents = newOpponents
+        notifyDataSetChanged()
+    }
 }

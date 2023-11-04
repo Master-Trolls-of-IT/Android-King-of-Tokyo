@@ -26,8 +26,8 @@
 
         <ImageView
             android:id="@+id/boardgameCrown"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:elevation="4dp"
             app:layout_constraintEnd_toEndOf="@+id/cardView"
             app:layout_constraintTop_toTopOf="@+id/cardView"
@@ -48,8 +48,8 @@
 
             <ImageView
                 android:id="@+id/boardgameKing"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="175dp"
+                android:layout_height="175dp"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 app:srcCompat="@drawable/croco" />
@@ -130,6 +130,7 @@
             android:id="@+id/gameboardUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="80dp"
             android:text="TextView"
             android:textAlignment="center"
             android:textColor="#A2A0A0"
@@ -137,8 +138,19 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/gameboardPlayerVP"
             app:layout_constraintEnd_toStartOf="@+id/gameboardPlayerHP"
+            app:layout_constraintTop_toTopOf="@+id/gameboardPlayerVP"
+            app:layout_constraintVertical_bias="0.7" />
+
+        <ImageView
+            android:id="@+id/playerAvatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="27dp"
+            android:src="@drawable/croco"
+            app:layout_constraintEnd_toStartOf="@+id/gameboardUsername"
+            app:layout_constraintHorizontal_bias="0.868"
             app:layout_constraintStart_toEndOf="@+id/gameboardPlayerVP"
-            app:layout_constraintTop_toTopOf="@+id/gameboardPlayerVP" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
