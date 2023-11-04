@@ -10,14 +10,26 @@ import androidx.lifecycle.ViewModel
 import com.example.kingoftokyo.R
 import com.example.kingoftokyo.boilerplate.getPredifinedPlayerCharacter
 import com.example.kingoftokyo.model.DiceModel
+import com.example.kingoftokyo.model.GameState
 import kotlin.random.Random
 
-class GameViewModel(private val view: View): ViewModel() {
+class GameViewModel(private val view: View, selectedPlayerId: Int): ViewModel() {
     private val _opponents = MutableLiveData<List<PlayerModel>>()
     var opponents: LiveData<List<PlayerModel>> = _opponents
 
+    private val _currentPlayer = MutableLiveData<PlayerModel>()
+    val currentPlayer: LiveData<PlayerModel> get() = _currentPlayer
+
     private val _player = MutableLiveData<PlayerModel>()
     var player : LiveData<PlayerModel> = _player
+
+    private val _currentState = MutableLiveData<GameState>()
+    val currentState: LiveData<GameState> = _currentState
+
+    init {
+        initCharactersList(selectedPlayerId)
+        startGame()
+    }
 
     fun initCharactersList(selectedCharacterId: Int) {
         val predifinedCharacters = getPredifinedPlayerCharacter(view)
@@ -65,5 +77,44 @@ class GameViewModel(private val view: View): ViewModel() {
 
         return diceResults
     }
+
+    fun startGame() {
+        _currentState.value = GameState.RollDiceState
+    }
+
+    fun goToNextState() {
+        when (_currentState.value) {
+            GameState.RollDiceState -> _currentState.value = GameState.BuyState
+            GameState.BuyState -> _currentState.value = GameState.AttackState
+            GameState.AttackState -> _currentState.value = GameState.ResolveDiceState
+            GameState.ResolveDiceState -> _currentState.value = GameState.EndTurnState
+            GameState.EndTurnState -> _currentState.value = GameState.RollDiceState
+            null -> TODO()
+        }
+    }
+
+    fun endTurn() {
+        // Mettez à jour l'état du jeu si nécessaire (par exemple, passer au tour suivant)
+        // Mettez à jour les points de victoire et de santé des joueurs
+        goToNextState()
+
+        // Vérifiez si c'est le tour du joueur ou d'un opposant
+        if (player.value?.id == currentPlayer.value?.id) {
+            // C'est le tour du joueur
+            // Effectuez les actions du joueur ici
+            // Par exemple, lancez les dés et mettez à jour les points de victoire et de santé
+        } else {
+            // C'est le tour d'un opposant
+            // Implémentez la logique de l'opposant ici (par exemple, IA simple)
+            performSimpleAI()
+        }
+    }
+
+    private fun performSimpleAI() {
+        // Implémentez la logique de l'IA ici (par exemple, faire toujours la même action)
+        // Mettez à jour l'état du jeu en conséquence
+        // Puis appelez endTurn() pour passer au tour suivant
+    }
+
 
 }

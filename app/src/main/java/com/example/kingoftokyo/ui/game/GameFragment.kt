@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
 import com.example.kingoftokyo.model.DiceModel
+import com.example.kingoftokyo.model.GameState
 import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
 
 class GameFragment : Fragment() {
@@ -40,8 +41,7 @@ class GameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = GameViewModel(view)
-        viewModel.initCharactersList(player.id)
+        viewModel = GameViewModel(view, player.id)
         opponentAdapter = OpponentAdapter(viewModel.opponents.value!!)
 
         val opponentRecyclerView = view.findViewById<RecyclerView>(R.id.gameboardOpponentCards)
@@ -58,6 +58,17 @@ class GameFragment : Fragment() {
 
         rollButton.setOnClickListener {
             openCustomModal()
+        }
+
+        viewModel.currentState.observe(viewLifecycleOwner) { gamestate ->
+            when (gamestate) {
+                GameState.RollDiceState -> {}
+                GameState.BuyState -> {}
+                GameState.AttackState -> {}
+                GameState.ResolveDiceState -> {}
+                GameState.EndTurnState -> {}
+                null -> TODO()
+            }
         }
     }
 
