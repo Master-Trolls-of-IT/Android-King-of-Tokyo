@@ -61,6 +61,7 @@ class GameFragment : Fragment() {
         }
 
         viewModel.currentState.observe(viewLifecycleOwner) { gamestate ->
+            rollButton.isEnabled = gamestate == GameState.RollDiceState
             when (gamestate) {
                 GameState.RollDiceState -> {}
                 GameState.BuyState -> {}
@@ -70,6 +71,7 @@ class GameFragment : Fragment() {
                 null -> TODO()
             }
         }
+
     }
 
     fun openCustomModal() {
@@ -81,22 +83,29 @@ class GameFragment : Fragment() {
         val diceRecyclerView = dialogView.findViewById<RecyclerView>(R.id.diceRecyclerView)
         val diceAdapter = DiceAdapter(
             listOf(
-                DiceModel("Croco Die", R.drawable.croco, "heal"),
-                DiceModel("Croco Die", R.drawable.croco, "attack"),
-                DiceModel("Croco Die", R.drawable.croco, "energy"),
-                DiceModel("Croco Die", R.drawable.croco, "victory1"),
-                DiceModel("Croco Die", R.drawable.croco, "victory2"),
-                DiceModel("Croco Die", R.drawable.croco, "victory3")
+                DiceModel("LoNoSe", R.drawable.face_inconnue, "face_inconnue"),
+                DiceModel("LoNoSe", R.drawable.face_inconnue, "face_inconnue"),
+                DiceModel("LoNoSe", R.drawable.face_inconnue, "face_inconnue"),
+                DiceModel("LoNoSe", R.drawable.face_inconnue, "face_inconnue"),
+                DiceModel("LoNoSe", R.drawable.face_inconnue, "face_inconnue"),
+                DiceModel("LoNoSe", R.drawable.face_inconnue, "face_inconnue")
             )
         )
         diceRecyclerView.adapter = diceAdapter
         diceRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
 
         val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
+        val rollButton = dialogView.findViewById<Button>(R.id.rollDiceButton)
         val alertDialog = dialogBuilder.create()
 
         closeButton.setOnClickListener {
+            viewModel.endTurn()
             alertDialog.dismiss()
+        }
+
+        rollButton.setOnClickListener {
+            val diceResults = viewModel.rollMultipleDice(6)
+            diceAdapter.updateDice(diceResults)
         }
 
         alertDialog.show()

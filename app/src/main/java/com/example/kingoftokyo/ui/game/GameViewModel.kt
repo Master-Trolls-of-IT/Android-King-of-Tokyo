@@ -13,7 +13,7 @@ import com.example.kingoftokyo.model.DiceModel
 import com.example.kingoftokyo.model.GameState
 import kotlin.random.Random
 
-class GameViewModel(private val view: View,private val selectedPlayerId: Int): ViewModel() {
+class GameViewModel(private var view: View,private var selectedPlayerId: Int): ViewModel() {
     private val _opponents = MutableLiveData<List<PlayerModel>>()
     var opponents: LiveData<List<PlayerModel>> = _opponents
 
@@ -63,13 +63,13 @@ class GameViewModel(private val view: View,private val selectedPlayerId: Int): V
 
             // Mappez le nombre aléatoire à une face du dé
             val result = when (randomValue) {
-                1 -> DiceModel("Croco Die", R.drawable.croco, "heal")
-                2 -> DiceModel("Croco Die", R.drawable.rabbit, "attack")
-                3 -> DiceModel("Croco Die", R.drawable.duck, "energy")
-                4 -> DiceModel("Croco Die", R.drawable.wolf, "victory1")
-                5 -> DiceModel("Croco Die", R.drawable.duck, "victory2")
-                6 -> DiceModel("Croco Die", R.drawable.croco, "victory3")
-                else -> DiceModel("Croco Die", R.drawable.croco, "face_inconnue") // En cas de valeur inattendue
+                1 -> DiceModel("Soin", R.drawable.heal, "heal")
+                2 -> DiceModel("Attaque", R.drawable.attack, "attack")
+                3 -> DiceModel("Energie", R.drawable.energy, "energy")
+                4 -> DiceModel("Victoire1", R.drawable.victory1, "victory1")
+                5 -> DiceModel("Victoire2", R.drawable.victory2, "victory2")
+                6 -> DiceModel("Victoire3", R.drawable.victory3, "victory3")
+                else -> DiceModel("LoNoSe", R.drawable.face_inconnue, "face_inconnue") // En cas de valeur inattendue
             }
 
             diceResults.add(result)
