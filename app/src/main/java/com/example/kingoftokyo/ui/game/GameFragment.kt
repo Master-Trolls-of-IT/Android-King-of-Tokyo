@@ -1,5 +1,6 @@
 package com.example.kingoftokyo.ui.game
 
+import CardAdapter
 import DiceAdapter
 import PlayerCharacter
 import PlayerModel
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
 import com.example.kingoftokyo.R.*
+import com.example.kingoftokyo.model.Card
 import com.example.kingoftokyo.model.DiceModel
 import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
 
@@ -57,9 +59,13 @@ class GameFragment : Fragment() {
         playerUsernameText.text = player.name
 
         val rollButton = view.findViewById<Button>(R.id.boardGameRollButton)
+        val inventoryButton = view.findViewById<Button>(R.id.boardGameInventoryButton)
 
         rollButton.setOnClickListener {
             openCustomModal()
+        }
+        inventoryButton.setOnClickListener{
+            openInventoryModal()
         }
     }
 
@@ -94,33 +100,36 @@ class GameFragment : Fragment() {
     }
 
 
-    fun openInventoryModal() {
+    private fun openInventoryModal() {
         val dialogBuilder = AlertDialog.Builder(requireContext())
         val inflater = layoutInflater
-        val InventoryView = inflater.inflate(layout.inventory_modal, null)
-        dialogBuilder.setView(InventoryView)
+        val inventoryView = inflater.inflate(layout.inventory_modal, null)
+        dialogBuilder.setView(inventoryView)
 
-        val diceRecyclerView = InventoryView.findViewById<RecyclerView>(R.id.inventoryRecyclerView)
-        val diceAdapter = DiceAdapter(
+        val inventoryRecyclerView =
+            inventoryView.findViewById<RecyclerView>(R.id.inventoryRecyclerView)
+        val cardAdapter = CardAdapter(
             listOf(
-                DiceModel("Croco Die", drawable.croco, "heal"),
-                DiceModel("Croco Die", drawable.croco, "attack"),
-                DiceModel("Croco Die", drawable.croco, "energy"),
-                DiceModel("Croco Die", drawable.croco, "victory1"),
-                DiceModel("Croco Die", drawable.croco, "victory2"),
-                DiceModel("Croco Die", drawable.croco, "victory3")
-            )
+                Card(1, "Card 1", drawable.crown, "Gagne 3 PV", 1, "type", "effect"),
+                Card(2, "Card 2", drawable.crown, "Inflige 2 points de dégats supplémentaire a chaque joueur", 2, "type", "effect"),
+                Card(3, "Card 3", drawable.crown, "Gagne une energie a chaque début de tour", 2, "type", "effect"),
+                Card(4, "Card 4", drawable.crown, "Inflige les dégats recus au autres joueurs", 7, "type", "effect"),
+                Card(5, "Card 5", drawable.crown, "Gagne 1 points de victoire a chaque début de tour", 4, "type", "effect"),
+                Card(6, "Card 6", drawable.crown, "Gagne 2 points de victoire par attaque", 7, "type", "effect"),
+                Card(7, "Card 7", drawable.crown, "Mange tes morts", 1, "type", "effect")
+                                )
         )
 
-        diceRecyclerView.adapter = diceAdapter
-        diceRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+        inventoryRecyclerView.adapter = cardAdapter
+        inventoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        val closeButton = InventoryView.findViewById<Button>(R.id.closeButton)
+        val closeInventoryButton = inventoryView.findViewById<Button>(R.id.closeInventoryButton)
+
         val alertDialog = dialogBuilder.create()
-
-        closeButton.setOnClickListener {
+        closeInventoryButton.setOnClickListener {
             alertDialog.dismiss()
         }
+
 
         alertDialog.show()
     }
