@@ -87,8 +87,13 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
 
             Log.d("Debug", "Personnage sélectionné : ${lastClickedCharacter!!.name}")
             Log.d("Debug", "Nom du joueur : $playerName")
+
+            val bundle = Bundle()
+            bundle.putParcelable("selectedCharacter", lastClickedCharacter)
+            bundle.putString("playerName", playerName)
+
             val navController = Navigation.findNavController(requireView())
-            navController.navigate(R.id.action_loginFragment2_to_gameFragment2)
+            navController.navigate(R.id.action_loginFragment2_to_gameFragment2, bundle)
         }
     }
 
