@@ -23,9 +23,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
 import com.example.kingoftokyo.R.*
+import com.example.kingoftokyo.boilerplate.getInitialsCards
+import com.example.kingoftokyo.boilerplate.getPredifinedCards
 import com.example.kingoftokyo.model.Card
 import com.example.kingoftokyo.model.DiceModel
 import com.example.kingoftokyo.model.GameState
+import com.example.kingoftokyo.ui.game.adapter.CardSlotAdpater
 import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -34,6 +37,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
     private lateinit var viewModel: GameViewModel
     private lateinit var player: PlayerModel
     private lateinit var opponentAdapter: OpponentAdapter
+    private lateinit var cardSlotAdapter: CardSlotAdpater
     private lateinit var diceAdapter: DiceAdapter
     private lateinit var diceList: List<DiceModel>
     private lateinit var king: PlayerModel
@@ -49,7 +53,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
         val selectedCharacter = arguments?.getParcelable<PlayerCharacter>("selectedCharacter")
         val playerName = arguments?.getString("playerName")
 
-        player = PlayerModel( selectedCharacter!!.id, playerName!!, selectedCharacter.characterImageResId, 0, 10, 0)
+        player = PlayerModel( selectedCharacter!!.id, playerName!!, selectedCharacter.characterImageResId, 0, 10, 0, emptyList())
 
         return inflater.inflate(layout.fragment_game, container, false)
     }
@@ -59,10 +63,16 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
         viewModel = GameViewModel(view, player.id)
         opponentAdapter = OpponentAdapter(viewModel.opponents.value!!)
+        cardSlotAdapter = CardSlotAdpater(getInitialsCards(view))
+
 
         val opponentRecyclerView = view.findViewById<RecyclerView>(R.id.gameboardOpponentCards)
         opponentRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         opponentRecyclerView.adapter = opponentAdapter
+
+        val playerCardsRecyclerView = view.findViewById<RecyclerView>(R.id.boardGameSpellCard)
+        playerCardsRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        playerCardsRecyclerView.adapter = cardSlotAdapter
 
         val playerHPText = view.findViewById<TextView>(R.id.gameboardPlayerHP)
         val playerVPText = view.findViewById<TextView>(R.id.gameboardPlayerVP)
@@ -228,17 +238,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
         val inventoryRecyclerView =
             inventoryView.findViewById<RecyclerView>(R.id.inventoryRecyclerView)
-        val cardAdapter = CardAdapter(
-            listOf(
-                Card(1, "Card 1", drawable.crown, "Gagne 3 PV", 1, "type", "effect"),
-                Card(2, "Card 2", drawable.crown, "Inflige 2 points de dégats supplémentaire a chaque joueur", 2, "type", "effect"),
-                Card(3, "Card 3", drawable.crown, "Gagne une energie a chaque début de tour", 2, "type", "effect"),
-                Card(4, "Card 4", drawable.crown, "Inflige les dégats recus au autres joueurs", 7, "type", "effect"),
-                Card(5, "Card 5", drawable.crown, "Gagne 1 points de victoire a chaque début de tour", 4, "type", "effect"),
-                Card(6, "Card 6", drawable.crown, "Gagne 2 points de victoire par attaque", 7, "type", "effect"),
-                Card(7, "Card 7", drawable.crown, "Mange tes morts", 1, "type", "effect")
-                                )
-        )
+        val cardAdapter = CardAdapter(getPredifinedCards(requireView()))
 
         inventoryRecyclerView.adapter = cardAdapter
         inventoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)

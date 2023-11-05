@@ -46,7 +46,7 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
         val predifinedCharacters = getPredifinedPlayerCharacter(view)
 
         val mappedPredifinedCharacters = predifinedCharacters.map {
-            PlayerModel( it.id, it.name, it.characterImageResId, 0, 10, 0)
+            PlayerModel( it.id, it.name, it.characterImageResId, 0, 10, 0, emptyList())
         }
 
         _opponents.value = mappedPredifinedCharacters.filter { it.id != selectedCharacterId }
@@ -96,20 +96,20 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
                     if (currentPlayer.value?.id == currentKing.value?.id) {
                         _opponents.value = _opponents.value?.map {
                             if (it.id == currentKing.value?.id) it
-                            else PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints - 1, it.energy)
+                            else PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints - 1, it.energy, it.cards)
                         }
 
                         if (player.value?.id != currentKing.value?.id) {
-                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! - 1, _player.value?.energy!!)
+                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! - 1, _player.value?.energy!!, _player.value?.cards!!)
                         }
                     } else {
                         _opponents.value = _opponents.value?.map {
-                            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints - 1, _player.value?.energy!!)
+                            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints - 1, _player.value?.energy!!, it.cards)
                             else it
                         }
 
                         if (player.value?.id == currentKing.value?.id) {
-                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! - 1, _player.value?.energy!!)
+                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! - 1, _player.value?.energy!!, _player.value?.cards!!)
                         }
                     }
                 }
@@ -117,24 +117,24 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
                     // Logique pour gérer le résultat "soin"
                     if (currentPlayer.value?.id == currentKing.value?.id) {
                         _opponents.value = _opponents.value?.map {
-                            if (it.id == currentPlayer.value?.id && it.healthPoints < 10) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints + 1, it.energy!!)
+                            if (it.id == currentPlayer.value?.id && it.healthPoints < 10) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints + 1, it.energy, it.cards)
                             else it
                         }
 
                         if (player.value?.id == currentPlayer.value?.id && player.value?.healthPoints!! < 10) {
-                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! + 1, _player.value?.energy!!)
+                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! + 1, _player.value?.energy!!, _player.value?.cards!!)
                         }
                     }
                 }
                 "energy" -> {
                     // Logique pour gérer le résultat "énergie"
                     _opponents.value = _opponents.value?.map {
-                        if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints, it.energy + 1)
+                        if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints, it.energy + 1, it.cards!!)
                         else it
                     }
 
                     if (player.value?.id == currentPlayer.value?.id) {
-                        _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!!, _player.value?.energy!! + 1)
+                        _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!!, _player.value?.energy!! + 1, _player.value?.cards!!)
                     }
                 }
                 "victory1" -> {
@@ -163,14 +163,14 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             victoryCount += victory2Count * 2
             victoryCount += victory3Count * 3
             _opponents.value = _opponents.value?.map {
-                if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + victoryCount, it.healthPoints, it.energy + 1)
+                if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + victoryCount, it.healthPoints, it.energy + 1, it.cards)
                 else it
             }
 
             if (player.value?.id == currentPlayer.value?.id) {
                 Log.d("player id1", _player.value?.id.toString())
                 Log.d("current id",currentPlayer.value?.id.toString())
-                _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!! + victoryCount, _player.value?.healthPoints!!, _player.value?.energy!! + 1)
+                _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!! + victoryCount, _player.value?.healthPoints!!, _player.value?.energy!! + 1, _player.value?.cards!!)
             }
         } else if (victory2Count >= 3) {
             var victoryCount = 2
@@ -180,14 +180,14 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             victoryCount += victory1Count
             victoryCount += victory3Count * 3
             _opponents.value = _opponents.value?.map {
-                if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + victoryCount, it.healthPoints, it.energy + 1)
+                if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + victoryCount, it.healthPoints, it.energy + 1, it.cards)
                 else it
             }
 
             if (player.value?.id == currentPlayer.value?.id) {
                 Log.d("player id2", _player.value?.id.toString())
                 Log.d("current id",currentPlayer.value?.id.toString())
-                _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!! + victoryCount, _player.value?.healthPoints!!, _player.value?.energy!! + 1)
+                _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!! + victoryCount, _player.value?.healthPoints!!, _player.value?.energy!! + 1, _player.value?.cards!!)
             }
         } else if (victory3Count >= 3) {
             var victoryCount = 3
@@ -199,23 +199,23 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             _opponents.value = _opponents.value?.map {
                 Log.d("player id3", _player.value?.id.toString())
                 Log.d("current id",currentPlayer.value?.id.toString())
-                if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + victoryCount, it.healthPoints, it.energy + 1)
+                if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + victoryCount, it.healthPoints, it.energy + 1, it.cards)
                 else it
             }
 
             if (player.value?.id == currentPlayer.value?.id) {
-                _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!! + victoryCount, _player.value?.healthPoints!!, _player.value?.energy!! + 1)
+                _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!! + victoryCount, _player.value?.healthPoints!!, _player.value?.energy!! + 1, _player.value?.cards!!)
             }
         }
 
         // Point de victoire pour le king
         _opponents.value = _opponents.value?.map {
-            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints , _player.value?.energy!! + 1)
+            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints , _player.value?.energy!! + 1, _player.value?.cards!!)
             else it
         }
 
         if (player.value?.id == currentKing.value?.id) {
-            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!!, _player.value?.energy!! + 1)
+            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!!, _player.value?.energy!! + 1, _player.value?.cards!!)
         }
 
         return opponents.value

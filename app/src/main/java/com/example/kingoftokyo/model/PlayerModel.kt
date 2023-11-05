@@ -1,5 +1,6 @@
 import android.os.Parcel
 import android.os.Parcelable
+import com.example.kingoftokyo.model.Card
 
 data class PlayerCharacter(
     val id: Int,
@@ -45,5 +46,6 @@ data class PlayerModel(
     val characterImageResId: Int,
     val victoryPoints: Int,
     val healthPoints: Int,
-    val energy: Int
+    val energy: Int,
+    val cards: List<Card>
 )

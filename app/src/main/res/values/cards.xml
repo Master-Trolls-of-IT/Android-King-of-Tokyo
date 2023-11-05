@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="predefined_cards">
+        <item>1, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>2, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>3, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>4, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>5, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>6, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>7, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>8, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>9, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>10, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+    </string-array>
+    <string name="initial_card">0, , @drawable/empty_card, , , , </string>
+</resources>
