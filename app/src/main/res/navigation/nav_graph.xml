@@ -23,6 +23,9 @@
         android:name="com.example.kingoftokyo.ui.game.GameFragment"
         android:label="fragment_game"
         tools:layout="@layout/fragment_game">
+        <action
+            android:id="@+id/action_gameFragment2_to_winFragment2"
+            app:destination="@id/winFragment" />
     </fragment>
 
     <fragment

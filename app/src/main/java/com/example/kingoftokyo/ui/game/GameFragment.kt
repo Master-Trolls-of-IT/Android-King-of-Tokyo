@@ -18,6 +18,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -128,11 +129,20 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
             }
 
             if (viewModel.player.value?.victoryPoints == 20) {
-
+                val bundle = Bundle()
+                bundle.putString("winner_name", viewModel.player.value?.name!!)
+                bundle.putInt("winner_imageId", viewModel.player.value?.characterImageResId!!)
+                val navController = Navigation.findNavController(requireView())
+                navController.navigate(R.id.action_gameFragment2_to_winFragment2, bundle)
             }
 
             if (viewModel.opponents.value?.find { it.victoryPoints == 20 } != null) {
-
+                val bundle = Bundle()
+                var winner = viewModel.opponents.value?.find { it.victoryPoints == 20 }
+                bundle.putString("winner_name", winner?.name!!)
+                bundle.putInt("winner_imageId", winner?.characterImageResId!!)
+                val navController = Navigation.findNavController(requireView())
+                navController.navigate(R.id.action_gameFragment2_to_winFragment2, bundle)
             }
 
             viewModel.currentPlayer.value?.id?.let { opponentAdapter.updateCurrentPlayerId(it) }
