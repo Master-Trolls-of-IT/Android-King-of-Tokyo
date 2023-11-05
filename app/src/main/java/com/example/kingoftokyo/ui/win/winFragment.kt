@@ -1,5 +1,6 @@
 package com.example.kingoftokyo.ui.win
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,10 +13,16 @@ import androidx.navigation.Navigation
 import com.example.kingoftokyo.R
 
 class WinFragment : Fragment() {
+    private lateinit var mediaPlayer: MediaPlayer
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.win);
+        mediaPlayer.isLooping = true;
+        mediaPlayer.start();
+
         var winnerName = arguments?.getString("winner_name")
         val view = inflater.inflate(R.layout.fragment_win, container, false)
 
@@ -33,5 +40,10 @@ class WinFragment : Fragment() {
         }
 
         return view
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.stop()
     }
 }

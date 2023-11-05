@@ -4,11 +4,10 @@ import CardAdapter
 import DiceAdapter
 import PlayerCharacter
 import PlayerModel
-import android.annotation.SuppressLint
 import android.graphics.drawable.LayerDrawable
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,13 +16,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
-import com.example.kingoftokyo.R.*
+import com.example.kingoftokyo.R.layout
 import com.example.kingoftokyo.boilerplate.getGameState
 import com.example.kingoftokyo.boilerplate.getInitialsCards
 import com.example.kingoftokyo.boilerplate.getPredifinedCards
@@ -36,6 +36,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+
 class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCardClickListener, CardSlotAdpater.CardSlotClickListener {
     private lateinit var viewModel: GameViewModel
     private lateinit var player: PlayerModel
@@ -43,6 +44,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
     private lateinit var cardSlotAdapter: CardSlotAdpater
     private lateinit var diceAdapter: DiceAdapter
     private lateinit var diceList: List<DiceModel>
+    private lateinit var mediaPlayer: MediaPlayer
     private var isAIPlaying: Boolean = false
     private var aiDiceRolled = false
     private var cardList: List<Card> = emptyList()
@@ -63,7 +65,15 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
 
         player = PlayerModel( selectedCharacter!!.id, playerName!!, selectedCharacter.characterImageResId, 0, 10, 0, emptyList())
 
+        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.sound);
+        mediaPlayer.isLooping = true;
+        mediaPlayer.start();
         return inflater.inflate(layout.fragment_game, container, false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.stop()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
