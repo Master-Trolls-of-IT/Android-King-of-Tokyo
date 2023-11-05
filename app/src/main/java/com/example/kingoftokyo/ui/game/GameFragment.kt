@@ -291,7 +291,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                     .create()
                 confirmationDialog.show()
             } else {
-                val message = "Vous n'avez pas suffisamment d'énergie pour acheter cette carte."
+                val message = "Vous n'avez pas suffisamment d'énergie pour acheter cette carte., il vous manque : ${card.cost - (currentPlayer!!.energy)} énergie"
                 val alertDialog = AlertDialog.Builder(requireContext())
                     .setTitle("Erreur d'achat")
                     .setMessage(message)
