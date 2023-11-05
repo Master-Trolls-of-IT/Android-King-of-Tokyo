@@ -44,6 +44,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
     private lateinit var king: PlayerModel
     private var isAIPlaying: Boolean = false
     private var aiDiceRolled = false
+    private var aiShopOpen = false
 
     private var remainingRollsValue: Int = 3
 
@@ -149,10 +150,15 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
                     viewModel.goToNextState()
                 }
                 GameState.BuyState -> {
-
+                    aiShopOpen = false
+                    if (isAIPlaying) {
+                        openInventoryModal()
+                    }
                 }
                 GameState.AttackState -> {
-
+                    if (isAIPlaying) {
+                        viewModel.goToNextState()
+                    }
                 }
                 GameState.EndTurnState -> {
                    viewModel.endTurn()
@@ -251,19 +257,30 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
         inventoryRecyclerView.adapter = cardAdapter
         inventoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        energyCount.text = viewModel.player.value?.energy.toString()
+        energyCount.text = viewModel.currentPlayer.value?.energy.toString()
 
         val closeInventoryButton = inventoryView.findViewById<Button>(R.id.closeInventoryButton)
 
         val alertDialog = dialogBuilder.create()
-        closeInventoryButton.setOnClickListener {
-            alertDialog.dismiss()
-            viewModel.goToNextState()
+        if (!isAIPlaying) {
+            alertDialog.show()
+            closeInventoryButton.setOnClickListener {
+                alertDialog.dismiss()
+                viewModel.goToNextState()
+            }
+        } else if (!aiShopOpen) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                aiShopOpen = true
+                delay(1500)
+                alertDialog.show()
+
+                closeInventoryButton.isEnabled = false
+
+                delay(2500)
+                viewModel.goToNextState()
+                alertDialog.dismiss()
+            }
         }
-
-
-        alertDialog.show()
-
     }
 
     override fun onDiceClicked(diceId: Int) {

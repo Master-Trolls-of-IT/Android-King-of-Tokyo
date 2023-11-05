@@ -35,6 +35,8 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
     var isImmune: Boolean = false
     var canGoOutOfTokyo: Boolean = false
 
+    var isKingTakenDamages: Boolean = false
+
     init {
         initCharactersList(selectedPlayerId)
         val isKingInOpponents = _opponents.value?.filter { it.id == 1 }
@@ -113,11 +115,23 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
                         }
                     } else {
                         _opponents.value = _opponents.value?.map {
-                            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, if (it.healthPoints - 1 - attackBonus > 0) it.healthPoints - 1 - attackBonus else 0, _player.value?.energy!!, it.cards)
+                            if (it.id == currentKing.value?.id) {
+                                isKingTakenDamages = true
+                                PlayerModel(
+                                    it.id,
+                                    it.name,
+                                    it.characterImageResId,
+                                    it.victoryPoints,
+                                    if (it.healthPoints - 1 - attackBonus > 0) it.healthPoints - 1 - attackBonus else 0,
+                                    _player.value?.energy!!,
+                                    it.cards
+                                )
+                            }
                             else it
                         }
 
                         if (player.value?.id == currentKing.value?.id && !isImmune) {
+                            isKingTakenDamages = true
                             _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! - 1, _player.value?.energy!!, _player.value?.cards!!)
                         }
                     }
@@ -217,14 +231,19 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
 
         // Point de victoire pour le king
         _opponents.value = _opponents.value?.map {
-            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints , _player.value?.energy!! + 1, _player.value?.cards!!)
+            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + 1, it.healthPoints , it.energy, it.cards!!)
             else it
         }
 
         if (player.value?.id == currentKing.value?.id) {
-            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!!, _player.value?.energy!! + 1, _player.value?.cards!!)
+            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!! + 1, _player.value?.healthPoints!!, _player.value?.energy!!, _player.value?.cards!!)
         }
 
+        if (_currentPlayer.value?.id == _player.value?.id) {
+            _currentPlayer.value = _player.value
+        } else {
+            _currentPlayer.value = _opponents.value?.find { it.id == _currentPlayer.value?.id }
+        }
 
         return opponents.value
     }
@@ -267,6 +286,7 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
 
         attackBonus = 0
         canGoOutOfTokyo = false
+        isKingTakenDamages = false
         goToNextState()
     }
 
