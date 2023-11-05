@@ -33,18 +33,21 @@ import com.example.kingoftokyo.ui.game.adapter.CardSlotAdpater
 import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
-class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCardClickListener {
+class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCardClickListener, CardSlotAdpater.CardSlotClickListener {
     private lateinit var viewModel: GameViewModel
     private lateinit var player: PlayerModel
     private lateinit var opponentAdapter: OpponentAdapter
     private lateinit var cardSlotAdapter: CardSlotAdpater
     private lateinit var diceAdapter: DiceAdapter
     private lateinit var diceList: List<DiceModel>
-    private lateinit var king: PlayerModel
     private var isAIPlaying: Boolean = false
     private var aiDiceRolled = false
     private var cardList: List<Card> = emptyList()
+    private var aiShopOpen = false
+    private var aiKingOpen = false
+
     private var remainingRollsValue: Int = 3
 
     override fun onCreateView(
@@ -64,7 +67,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
 
         viewModel = GameViewModel(view, player.id)
         opponentAdapter = OpponentAdapter(viewModel.opponents.value!!)
-        cardSlotAdapter = CardSlotAdpater(getInitialsCards(view))
+        cardSlotAdapter = CardSlotAdpater(getInitialsCards(view), this)
 
 
         val opponentRecyclerView = view.findViewById<RecyclerView>(R.id.gameboardOpponentCards)
@@ -113,12 +116,13 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
 
             rollButton.isEnabled = (gamestate == GameState.RollDiceState) && !isAIPlaying
             inventoryButton.isEnabled = (gamestate == GameState.BuyState) && !isAIPlaying
-//            skipButton.isEnabled = !isAIPlaying
+            cardSlotAdapter.updateIsAttackState((gamestate == GameState.AttackState) && !isAIPlaying)
+            kingAvatar.setImageResource(viewModel.currentKing.value?.characterImageResId ?: player.characterImageResId)
+            skipButton.isEnabled = !isAIPlaying
+
 
             viewModel.currentPlayer.value?.id?.let { opponentAdapter.updateCurrentPlayerId(it) }
 
-            Log.d("ActualPlayer: ", viewModel.currentPlayer.value?.name.toString())
-            Log.d("ActualGameState: ", gamestate.toString())
 
             if (!isAIPlaying) {
                 val borderDrawable = ContextCompat.getDrawable(view.context, R.drawable.border)
@@ -152,13 +156,19 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                     viewModel.goToNextState()
                 }
                 GameState.BuyState -> {
-
+                    aiShopOpen = false
+                    if (isAIPlaying) {
+                        openInventoryModal()
+                    }
                 }
                 GameState.AttackState -> {
-
+                    if (isAIPlaying) {
+                        viewModel.goToNextState()
+                    }
                 }
                 GameState.EndTurnState -> {
-                   viewModel.endTurn()
+                    aiKingOpen = false
+                    openTokyoModal()
                 }
                 null -> TODO()
             }
@@ -259,12 +269,80 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
 
 
         val alertDialog = dialogBuilder.create()
-        closeInventoryButton.setOnClickListener {
-            alertDialog.dismiss()
-            viewModel.goToNextState()
+        if (!isAIPlaying) {
+            alertDialog.show()
+            closeInventoryButton.setOnClickListener {
+                alertDialog.dismiss()
+                viewModel.goToNextState()
+            }
+        } else if (!aiShopOpen) {
+            viewLifecycleOwner.lifecycleScope.launch {
+                aiShopOpen = true
+                delay(1500)
+                alertDialog.show()
+
+                closeInventoryButton.isEnabled = false
+
+                delay(2500)
+                viewModel.goToNextState()
+                alertDialog.dismiss()
+            }
+        }
+    }
+
+    fun openTokyoModal() {
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        val inflater = layoutInflater
+        val tokyoModal = inflater.inflate(layout.tokyo_modal, null)
+        dialogBuilder.setView(tokyoModal)
+
+        val title = tokyoModal.findViewById<TextView>(R.id.tokyoModalTitle)
+        val confirmButton = tokyoModal.findViewById<TextView>(R.id.tokyoModalConfirm)
+        val denyButton = tokyoModal.findViewById<TextView>(R.id.tokyoModalDeny)
+
+        title.text = buildString {
+            append("Voulez-vous sortir de tokyo ")
+            append(viewModel.currentKing.value?.name)
+            append("?")
         }
 
-        alertDialog.show()
+        val alertDialog = dialogBuilder.create()
+
+        if (viewModel.canGoOutOfTokyo) {
+            if (viewModel.isKingAI) {
+                alertDialog.show()
+                confirmButton.setOnClickListener {
+                    viewModel.nextKing()
+                    alertDialog.dismiss()
+                    viewModel.endTurn()
+                }
+
+                denyButton.setOnClickListener {
+                    alertDialog.dismiss()
+                    viewModel.endTurn()
+                }
+            } else if (!aiKingOpen) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    aiKingOpen = true
+                    confirmButton.isEnabled = false
+                    denyButton.isEnabled = false
+                    delay(1000)
+
+                    alertDialog.show()
+
+                    val randomValue = Random.nextInt(1, 2)
+
+                    if (randomValue == 1) {
+                        viewModel.nextKing()
+                    }
+
+                    alertDialog.dismiss()
+                    viewModel.endTurn()
+                }
+            }
+        } else {
+            viewModel.endTurn()
+        }
 
     }
 
@@ -337,4 +415,13 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
 
 
 
+    override fun onSlotCardClick(cardPosition: Int) {
+        viewModel.onCardUsed(cardPosition)
+
+        val currentCards = (viewModel.player.value?.cards ?: emptyList()).toMutableList()
+
+        currentCards[cardPosition] = getInitialsCards(requireView())[0]
+
+        viewModel.player.value?.copy(cards = currentCards)?.let { viewModel.updatePlayer(it) }
+    }
 }
