@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="predefined_cards">
+        <item>1, Éruption Volcanique, @drawable/card1, Infligez 3 points de dégâts à tous les adversaires., 7, attack, 3</item>
+        <item>2, Invasion Extraterrestre, @drawable/card2, Volez 2 points d énergie à chaque adversaire., 8, energy, 2</item>
+        <item>3, Métamorphose Monstrueuse, @drawable/card3, Transformez-vous en une forme monstrueuse gagnant +3 points d attaque pour le reste du tour., 7, attack, 3</item>
+        <item>4, Souffle Glacial, @drawable/card4, Infligez 2 points de dégâts à tous les adversaires., 4, attack, 2</item>
+        <item>5, Super Vitesse, @drawable/card5, Vous pouvez quitter Tokyo ou y entrer sans subir de dégâts., 7, energy, 0</item>
+        <item>6, Invisibilité, @drawable/card6, Vous êtes immunisé contre toutes les attaques ce tour., 7, heal, 0</item>
+        <item>7, Siphon d Énergie, @drawable/card7, Gagnez 3 points d énergie., 4, energy, 3</item>
+        <item>8, Siphon de victoire, @drawable/card8, Tout le monde sauf vous repart à 0 point de victoire, 10, energy, 0</item>
+        <item>9, Météore Dévastateur, @drawable/card9, Infligez 5 points de dégâts à tous les adversaires., 10, attack, 5</item>
+        <item>10, Super Régénération, @drawable/card10, Récupérez 4 points de vie à la fin de votre tour., 6, heal, 4</item>
+        <item>11, Gain de Points de Victoire, @drawable/card11, Gagner 2 points de victoire., 3, victory, 2</item>
+        <item>12, Régénération Instantanée, @drawable/card12, Récupérez 3 points de vie à la fin de votre tour., 6, heal, 3</item>
+        <item>13, Emprise Surnaturelle, @drawable/card13, Siphonnez 2 points de victoire à tous les adversaires et gagnez 2 points de vie., 10, victory, -2</item>
+        <item>14, Drain d Énergie, @drawable/card14, Volez 1 point de victoire à chaque adversaire et récupérez 2 points de vie., 8, heal, 2</item>
+        <item>15, Guérison Totale, @drawable/card15, Récupérez tous vos points de vie et gagnez 1 point de victoire., 10, heal, 0</item>
+    </string-array>
+    <string name="initial_card">0, , @drawable/empty_card, , , , </string>
+</resources>

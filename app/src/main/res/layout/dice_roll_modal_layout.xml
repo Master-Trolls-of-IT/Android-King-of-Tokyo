@@ -22,21 +22,32 @@
 
     <!-- Zone de texte pour le nombre de lancers restants -->
     <TextView
+        android:id="@+id/remainingRollsText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Lancers restants : 3"
-        android:id="@+id/remainingRollsText" />
+        android:text="Lancers restants : " />
 
     <!-- Bouton pour lancer les dés -->
+    <TextView
+        android:id="@+id/reamainingRollsValue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="3"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Lancer les dés"
         android:id="@+id/rollDiceButton"/>
+
     <Button
-        android:layout_width="wrap_content"
+        android:id="@+id/closeButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Fermer"
-        android:id="@+id/closeButton" />
+        android:layout_marginTop="25dp"
+        android:text="Valider" />
 </LinearLayout>
