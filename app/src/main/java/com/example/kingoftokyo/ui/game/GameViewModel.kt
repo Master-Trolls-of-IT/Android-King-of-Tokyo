@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.kingoftokyo.R
+import com.example.kingoftokyo.boilerplate.getInitialsCards
 import com.example.kingoftokyo.boilerplate.getPredifinedPlayerCharacter
 import com.example.kingoftokyo.model.DiceModel
 import com.example.kingoftokyo.model.GameState
@@ -30,6 +31,10 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
     private val _currentState = MutableLiveData<GameState>()
     val currentState: LiveData<GameState> get() = _currentState
 
+    var attackBonus: Int = 0
+    var isImmune: Boolean = false
+    var canGoOutOfTokyo: Boolean = false
+
     init {
         initCharactersList(selectedPlayerId)
         val isKingInOpponents = _opponents.value?.filter { it.id == 1 }
@@ -40,6 +45,10 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
         }
         _currentPlayer.value = _currentKing.value
         startGame()
+    }
+
+    fun updatePlayer(newPlayer: PlayerModel) {
+        _player.value = newPlayer
     }
 
     fun initCharactersList(selectedCharacterId: Int) {
@@ -96,19 +105,19 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
                     if (currentPlayer.value?.id == currentKing.value?.id) {
                         _opponents.value = _opponents.value?.map {
                             if (it.id == currentKing.value?.id) it
-                            else PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints - 1, it.energy, it.cards)
+                            else PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, if (it.healthPoints - 1 - attackBonus > 0) it.healthPoints - 1 - attackBonus else 0, it.energy, it.cards)
                         }
 
-                        if (player.value?.id != currentKing.value?.id) {
-                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! - 1, _player.value?.energy!!, _player.value?.cards!!)
+                        if (player.value?.id != currentKing.value?.id && !isImmune) {
+                            _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, if (_player.value?.healthPoints!! - 1 > 0 ) _player.value?.healthPoints!! - 1 else 0, _player.value?.energy!!, _player.value?.cards!!)
                         }
                     } else {
                         _opponents.value = _opponents.value?.map {
-                            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, it.healthPoints - 1, _player.value?.energy!!, it.cards)
+                            if (it.id == currentKing.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, if (it.healthPoints - 1 - attackBonus > 0) it.healthPoints - 1 - attackBonus else 0, _player.value?.energy!!, it.cards)
                             else it
                         }
 
-                        if (player.value?.id == currentKing.value?.id) {
+                        if (player.value?.id == currentKing.value?.id && !isImmune) {
                             _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!! - 1, _player.value?.energy!!, _player.value?.cards!!)
                         }
                     }
@@ -216,12 +225,14 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             _player.value = PlayerModel(_player.value?.id!!, _player.value?.name!!, _player.value?.characterImageResId!!, _player.value?.victoryPoints!!, _player.value?.healthPoints!!, _player.value?.energy!! + 1, _player.value?.cards!!)
         }
 
+
         return opponents.value
     }
 
 
     fun startGame() {
         _currentState.value = GameState.RollDiceState
+        _player.value?.cards = getInitialsCards(view)
     }
 
     fun goToNextState() {
@@ -246,14 +257,70 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
         Log.d("endTurn NewcurrentPlayerId", currentPlayerId.toString())
         if (_player.value?.id == currentPlayerId) {
             Log.d("isNewPlayer player", "yes")
+            isImmune = false
             _currentPlayer.value = _player.value
         } else {
             Log.d("isNewPlayer player", "Nop")
             _currentPlayer.value = _opponents.value?.find { it.id == currentPlayerId }
             Log.d("final opponent", _currentPlayer.value?.id.toString())
         }
+
+        attackBonus = 0
+        canGoOutOfTokyo = false
         goToNextState()
     }
 
+    fun stealHeath(opponentsMalus: Int, playerBonus: Int) {
+        _opponents.value = _opponents.value?.map {
+            PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints, if (it.healthPoints - opponentsMalus > 0) it.healthPoints - opponentsMalus else 0 , it.energy, it.cards)
+        }
 
+        if ((player.value?.healthPoints ?: 0) + playerBonus > 20) _player.value?.healthPoints = 20
+        else _player.value?.healthPoints?.plus(playerBonus)
+    }
+
+    fun stealVictory(opponentsMalus: Int, playerBonus: Int) {
+        _opponents.value = _opponents.value?.map {
+            PlayerModel(it.id, it.name, it.characterImageResId, if (it.victoryPoints - opponentsMalus > 0) it.victoryPoints - opponentsMalus else 0 , it.healthPoints, it.energy, it.cards)
+        }
+
+        player.value?.victoryPoints?.plus(playerBonus)
+    }
+
+    fun stealEnergy(opponentsMalus: Int, playerBonus: Int){
+        _opponents.value = _opponents.value?.map {
+            PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints , it.healthPoints, if (it.energy - opponentsMalus > 0) it.energy - opponentsMalus else 0, it.cards)
+        }
+
+        player.value?.energy?.plus(playerBonus)
+    }
+
+    fun onCardUsed(cardPosition: Int) {
+        val usedCard = _player.value?.cards?.get(cardPosition)
+
+        when (usedCard?.id) {
+            0 -> {}
+            1 -> {stealHeath(3, 0)}
+            2 -> {stealEnergy(2, 6)}
+            3 -> {attackBonus = 3}
+            4 -> {stealHeath(4, 0)}
+            5 -> {canGoOutOfTokyo = true}
+            6 -> {isImmune = true}
+            7 -> {stealEnergy(0, 4)}
+            8 -> {stealVictory(99, 0)}
+            9 -> {stealHeath(5, 0)}
+            10 -> {stealHeath(0, 4)}
+            11 -> {stealVictory(0, 2)}
+            12 -> {stealHeath(0, 3)}
+            13 -> {
+                stealVictory(2, 6)
+                stealHeath(0, 2)
+            }
+            14 -> {
+                stealVictory(1, 3)
+                stealHeath(0, 2)
+            }
+            15 -> {stealHeath(0, 99)}
+        }
+    }
 }

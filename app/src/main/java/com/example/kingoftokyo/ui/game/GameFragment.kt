@@ -34,7 +34,7 @@ import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
+class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.CardSlotClickListener {
     private lateinit var viewModel: GameViewModel
     private lateinit var player: PlayerModel
     private lateinit var opponentAdapter: OpponentAdapter
@@ -64,7 +64,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
         viewModel = GameViewModel(view, player.id)
         opponentAdapter = OpponentAdapter(viewModel.opponents.value!!)
-        cardSlotAdapter = CardSlotAdpater(getInitialsCards(view))
+        cardSlotAdapter = CardSlotAdpater(getInitialsCards(view), this)
 
 
         val opponentRecyclerView = view.findViewById<RecyclerView>(R.id.gameboardOpponentCards)
@@ -110,12 +110,12 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
             rollButton.isEnabled = (gamestate == GameState.RollDiceState) && !isAIPlaying
             inventoryButton.isEnabled = (gamestate == GameState.BuyState) && !isAIPlaying
-//            skipButton.isEnabled = !isAIPlaying
+            cardSlotAdapter.updateIsAttackState((gamestate == GameState.AttackState) && !isAIPlaying)
+            skipButton.isEnabled = !isAIPlaying
+
 
             viewModel.currentPlayer.value?.id?.let { opponentAdapter.updateCurrentPlayerId(it) }
 
-            Log.d("ActualPlayer: ", viewModel.currentPlayer.value?.name.toString())
-            Log.d("ActualGameState: ", gamestate.toString())
 
             if (!isAIPlaying) {
                 val borderDrawable = ContextCompat.getDrawable(view.context, R.drawable.border)
@@ -251,7 +251,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
         inventoryRecyclerView.adapter = cardAdapter
         inventoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        energyCount.text = viewModel.currentPlayer.value?.energy.toString()
+        energyCount.text = viewModel.player.value?.energy.toString()
 
         val closeInventoryButton = inventoryView.findViewById<Button>(R.id.closeInventoryButton)
 
@@ -268,5 +268,15 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
     override fun onDiceClicked(diceId: Int) {
         diceAdapter.toggleRollability(diceId)
+    }
+
+    override fun onSlotCardClick(cardPosition: Int) {
+        viewModel.onCardUsed(cardPosition)
+
+        val currentCards = (viewModel.player.value?.cards ?: emptyList()).toMutableList()
+
+        currentCards[cardPosition] = getInitialsCards(requireView())[0]
+
+        viewModel.player.value?.copy(cards = currentCards)?.let { viewModel.updatePlayer(it) }
     }
 }

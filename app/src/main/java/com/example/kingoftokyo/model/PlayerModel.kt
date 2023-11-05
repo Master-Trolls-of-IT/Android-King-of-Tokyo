@@ -44,8 +44,8 @@ data class PlayerModel(
     val id: Int,
     val name: String,
     val characterImageResId: Int,
-    val victoryPoints: Int,
-    val healthPoints: Int,
-    val energy: Int,
-    val cards: List<Card>
+    var victoryPoints: Int,
+    var healthPoints: Int,
+    var energy: Int,
+    var cards: List<Card>
 )
