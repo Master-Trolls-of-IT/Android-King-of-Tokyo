@@ -46,6 +46,6 @@ data class PlayerModel(
     val characterImageResId: Int,
     val victoryPoints: Int,
     val healthPoints: Int,
-    val energy: Int,
+    var energy: Int,
     val cards: List<Card>
 )
