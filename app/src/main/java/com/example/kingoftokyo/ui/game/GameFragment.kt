@@ -264,12 +264,6 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
             viewModel.goToNextState()
         }
 
-        buyCardButton.setOnClickListener {
-            val selectedCard = null
-
-            buyCard(selectedCard!!)
-
-        }
         alertDialog.show()
 
     }
@@ -281,11 +275,22 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
     override fun onCardClicked(cardId: Int) {
         val card = cardList.find { it.id == cardId }
         if (card != null) {
-            if (canBuyCard(card)) {
-                // Si le joueur peut acheter la carte
-                buyCard(card)
+            val currentPlayer = viewModel.currentPlayer.value
+            if (canBuyCard(card, currentPlayer)) {
+                val confirmationDialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Confirmation d'achat")
+                    .setMessage("Voulez-vous vraiment acheter ${card.name} pour ${card.cost} énergie ?")
+                    .setPositiveButton("Oui") { dialog, _ ->
+                        dialog.dismiss()
+                        buyCard(card, currentPlayer)
+                        val energyCount = view?.findViewById<TextView>(R.id.energyCount)
+                        energyCount?.text = currentPlayer?.energy.toString()
+                        //cardSlotAdapter.updateCards(currentPlayer?.inventory)
+                    }
+                    .setNegativeButton("Annuler") { dialog, _ -> dialog.dismiss() }
+                    .create()
+                confirmationDialog.show()
             } else {
-                // Si le joueur n'a pas assez d'énergie pour acheter la carte
                 val message = "Vous n'avez pas suffisamment d'énergie pour acheter cette carte."
                 val alertDialog = AlertDialog.Builder(requireContext())
                     .setTitle("Erreur d'achat")
@@ -297,21 +302,14 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
         }
     }
 
-    private fun canBuyCard(card: Card): Boolean {
-        val currentPlayer = viewModel.currentPlayer.value
+    private fun canBuyCard(card: Card, currentPlayer: PlayerModel?): Boolean {
         return currentPlayer != null && currentPlayer.energy >= card.cost
     }
 
-    private fun buyCard(card: Card) {
-        val currentPlayer = viewModel.currentPlayer.value
-        if (currentPlayer != null) {
-            currentPlayer.energy -= card.cost
-
-            //currentPlayer.inventory.add(card)
-
-            val energyCount = view?.findViewById<TextView>(R.id.energyCount)
-            energyCount?.text = currentPlayer.energy.toString()
-
+    private fun buyCard(card: Card, currentPlayer: PlayerModel?) {
+        currentPlayer?.let {
+            it.energy -= card.cost
+           // it.inventory.add(card)
             val message = "Vous venez d'acheter ${card.name}"
             val alertDialog = AlertDialog.Builder(requireContext())
                 .setTitle("Achat effectué")
@@ -319,9 +317,9 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                 .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                 .create()
             alertDialog.show()
-            //cardSlotAdapter.updateCards(currentPlayer.inventory)
         }
     }
+
 
 
 }
