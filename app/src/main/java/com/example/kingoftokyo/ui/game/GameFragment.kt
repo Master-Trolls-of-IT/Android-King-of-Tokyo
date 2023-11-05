@@ -33,6 +33,7 @@ import com.example.kingoftokyo.ui.game.adapter.CardSlotAdpater
 import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.CardSlotClickListener {
     private lateinit var viewModel: GameViewModel
@@ -41,10 +42,10 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
     private lateinit var cardSlotAdapter: CardSlotAdpater
     private lateinit var diceAdapter: DiceAdapter
     private lateinit var diceList: List<DiceModel>
-    private lateinit var king: PlayerModel
     private var isAIPlaying: Boolean = false
     private var aiDiceRolled = false
     private var aiShopOpen = false
+    private var aiKingOpen = false
 
     private var remainingRollsValue: Int = 3
 
@@ -112,6 +113,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
             rollButton.isEnabled = (gamestate == GameState.RollDiceState) && !isAIPlaying
             inventoryButton.isEnabled = (gamestate == GameState.BuyState) && !isAIPlaying
             cardSlotAdapter.updateIsAttackState((gamestate == GameState.AttackState) && !isAIPlaying)
+            kingAvatar.setImageResource(viewModel.currentKing.value?.characterImageResId ?: player.characterImageResId)
             skipButton.isEnabled = !isAIPlaying
 
 
@@ -161,7 +163,8 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
                     }
                 }
                 GameState.EndTurnState -> {
-                   viewModel.endTurn()
+                    aiKingOpen = false
+                    openTokyoModal()
                 }
                 null -> TODO()
             }
@@ -281,6 +284,66 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
                 alertDialog.dismiss()
             }
         }
+    }
+
+    fun openTokyoModal() {
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        val inflater = layoutInflater
+        val tokyoModal = inflater.inflate(layout.tokyo_modal, null)
+        dialogBuilder.setView(tokyoModal)
+
+        val title = tokyoModal.findViewById<TextView>(R.id.tokyoModalTitle)
+        val confirmButton = tokyoModal.findViewById<TextView>(R.id.tokyoModalConfirm)
+        val denyButton = tokyoModal.findViewById<TextView>(R.id.tokyoModalDeny)
+
+        title.text = buildString {
+            append("Voulez-vous sortir de tokyo ")
+            append(viewModel.currentKing.value?.name)
+            append("?")
+        }
+
+        val alertDialog = dialogBuilder.create()
+
+        if (viewModel.canGoOutOfTokyo) {
+            if (viewModel.isKingAI) {
+                alertDialog.show()
+                confirmButton.setOnClickListener {
+                    viewModel.nextKing()
+                    alertDialog.dismiss()
+                    viewModel.endTurn()
+                }
+
+                denyButton.setOnClickListener {
+                    alertDialog.dismiss()
+                    viewModel.endTurn()
+                }
+            } else if (!aiKingOpen) {
+                viewLifecycleOwner.lifecycleScope.launch {
+                    aiKingOpen = true
+                    confirmButton.isEnabled = false
+                    denyButton.isEnabled = false
+                    delay(1000)
+
+                    alertDialog.show()
+
+                    val randomValue = Random.nextInt(1, 2)
+
+                    if (randomValue == 1) {
+                        viewModel.nextKing()
+                    }
+
+                    alertDialog.dismiss()
+                    viewModel.endTurn()
+                }
+            }
+        } else {
+            viewModel.endTurn()
+        }
+
+
+
+
+
     }
 
     override fun onDiceClicked(diceId: Int) {

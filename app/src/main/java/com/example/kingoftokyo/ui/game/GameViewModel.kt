@@ -36,6 +36,7 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
     var canGoOutOfTokyo: Boolean = false
 
     var isKingTakenDamages: Boolean = false
+    var isKingAI: Boolean = false
 
     init {
         initCharactersList(selectedPlayerId)
@@ -43,6 +44,7 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
         if (isKingInOpponents?.size == 0) {
             _currentKing.value = _player.value
         } else {
+            isKingAI = true
             _currentKing.value = isKingInOpponents?.get(0)
         }
         _currentPlayer.value = _currentKing.value
@@ -94,6 +96,24 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
                 result
             } else it
         }
+    }
+
+    fun nextKing() {
+        var currentKingId = currentKing.value?.id
+        if (currentKingId != null) {
+            currentKingId = currentKingId + 1
+        }
+        if (currentKingId == 5) {
+            currentKingId = 1
+        }
+        if (player.value?.id == currentKingId) {
+            isKingAI = false
+            _currentKing.value = player.value
+        } else {
+            isKingAI = true
+            _currentKing.value = _opponents.value?.find { it.id == currentKingId }
+        }
+
     }
 
     fun calculateDiceResults(diceResults: List<DiceModel>): List<PlayerModel>? {
