@@ -5,6 +5,7 @@ import DiceAdapter
 import PlayerCharacter
 import PlayerModel
 import android.annotation.SuppressLint
+import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -15,7 +16,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.ViewModelProvider
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +27,8 @@ import com.example.kingoftokyo.model.Card
 import com.example.kingoftokyo.model.DiceModel
 import com.example.kingoftokyo.model.GameState
 import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
     private lateinit var viewModel: GameViewModel
@@ -33,6 +37,8 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
     private lateinit var diceAdapter: DiceAdapter
     private lateinit var diceList: List<DiceModel>
     private lateinit var king: PlayerModel
+    private var isAIPlaying: Boolean = false
+    private var aiDiceRolled = false
 
     private var remainingRollsValue: Int = 3
 
@@ -81,10 +87,25 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
         }
 
         viewModel.currentState.observe(viewLifecycleOwner) { gamestate ->
-            rollButton.isEnabled = gamestate == GameState.RollDiceState
-            // TODO: activer le bouton d'inventaire uniquement quand c'est la phase d'achat
+            isAIPlaying = viewModel.currentPlayer.value?.id != viewModel.player.value?.id
+
+            rollButton.isEnabled = (gamestate == GameState.RollDiceState) && !isAIPlaying
+            Log.d("currentplayer", viewModel.currentPlayer.value?.name.toString())
+            Log.d("gameState", gamestate.toString())
+            Log.d("isRollEnabled", rollButton.isEnabled.toString())
+            inventoryButton.isEnabled = (gamestate == GameState.BuyState) && !isAIPlaying
+
+            viewModel.currentPlayer.value?.id?.let { opponentAdapter.updateCurrentPlayerId(it) }
+
+            if (!isAIPlaying) {
+                val borderDrawable = ContextCompat.getDrawable(view.context, R.drawable.border)
+                val layers = arrayOf(playerAvatar.drawable, borderDrawable)
+                val layerDrawable = LayerDrawable(layers)
+                playerAvatar.setImageDrawable(layerDrawable)
+            }
             when (gamestate) {
                 GameState.RollDiceState -> {
+                    aiDiceRolled = false
                     remainingRollsValue = 3
                     diceList = listOf(
                         DiceModel(0, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true),
@@ -94,6 +115,9 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
                         DiceModel(4, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true),
                         DiceModel(5, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true)
                     )
+                    if (isAIPlaying) {
+                        openCustomModal()
+                    }
                 }
                 GameState.ResolveDiceState -> {
                     val diceResults = viewModel.calculateDiceResults(diceList)
@@ -101,11 +125,21 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
                     opponentAdapter.updateOpponents(diceResults!!)
                     playerHPText.text = viewModel.player.value?.healthPoints.toString()
                     playerVPText.text = viewModel.player.value?.victoryPoints.toString()
-                    viewModel.endTurn()
+                    viewModel.goToNextState()
                 }
-                GameState.BuyState -> {}
-                GameState.AttackState -> {}
-                GameState.EndTurnState -> {}
+                GameState.BuyState -> {
+                    if (isAIPlaying) {
+                        viewModel.goToNextState()
+                    }
+                }
+                GameState.AttackState -> {
+                    if (isAIPlaying) {
+                        viewModel.goToNextState()
+                    }
+                }
+                GameState.EndTurnState -> {
+                   viewModel.endTurn()
+                }
                 null -> TODO()
             }
         }
@@ -128,23 +162,62 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
         remainingRolls.text = remainingRollsValue.toString()
         val alertDialog = dialogBuilder.create()
 
-        closeButton.setOnClickListener {
-            viewModel.endTurn()
-            alertDialog.dismiss()
-        }
-
-        rollButton.setOnClickListener {
-            val diceResults = viewModel.rollDices(diceAdapter.diceList)
-            remainingRollsValue--
-            remainingRolls.text = remainingRollsValue.toString()
-            if (remainingRollsValue == 0) {
-                rollButton.isEnabled = false
+        if (!isAIPlaying) {
+            closeButton.setOnClickListener {
+                viewModel.endTurn()
+                alertDialog.dismiss()
             }
-            diceList = diceResults
-            diceAdapter.updateDice(diceResults)
+
+            rollButton.setOnClickListener {
+                val diceResults = viewModel.rollDices(diceAdapter.diceList)
+                remainingRollsValue--
+                remainingRolls.text = remainingRollsValue.toString()
+                if (remainingRollsValue == 0) {
+                    rollButton.isEnabled = false
+                }
+                diceList = diceResults
+                diceAdapter.updateDice(diceResults)
+
+            }
+            alertDialog.show()
+        } else if (!aiDiceRolled) {
+            viewLifecycleOwner.lifecycleScope.launch  {
+                aiDiceRolled = true
+                delay(1500)
+                alertDialog.show()
+                rollButton.isEnabled = false
+                closeButton.isEnabled = false
+
+                var diceResults = viewModel.rollDices(diceAdapter.diceList)
+                remainingRollsValue--
+                remainingRolls.text = remainingRollsValue.toString()
+                if (remainingRollsValue == 0) {
+                    rollButton.isEnabled = false
+                }
+                diceList = diceResults
+                diceAdapter.updateDice(diceResults)
+
+                delay(2500)
+
+                diceResults = viewModel.rollDices(diceAdapter.diceList)
+                remainingRollsValue--
+                remainingRolls.text = remainingRollsValue.toString()
+                if (remainingRollsValue == 0) {
+                    rollButton.isEnabled = false
+                }
+                diceList = diceResults
+                diceAdapter.updateDice(diceResults)
+
+                delay(2500)
+
+                viewModel.goToNextState()
+                alertDialog.dismiss()
+            }
         }
 
-        alertDialog.show()
+
+
+
     }
 
     private fun openInventoryModal() {

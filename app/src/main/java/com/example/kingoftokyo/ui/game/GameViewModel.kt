@@ -32,7 +32,13 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
 
     init {
         initCharactersList(selectedPlayerId)
-        _currentKing.value = player.value
+        val isKingInOpponents = _opponents.value?.filter { it.id == 1 }
+        if (isKingInOpponents?.size == 0) {
+            _currentKing.value = _player.value
+        } else {
+            _currentKing.value = isKingInOpponents?.get(0)
+        }
+        _currentPlayer.value = _currentKing.value
         startGame()
     }
 
@@ -218,7 +224,6 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
 
     fun startGame() {
         _currentState.value = GameState.RollDiceState
-        _currentPlayer.value = player.value
     }
 
     fun goToNextState() {
@@ -233,27 +238,29 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
     }
 
     fun endTurn() {
-        // Mettez à jour l'état du jeu si nécessaire (par exemple, passer au tour suivant)
-        // Mettez à jour les points de victoire et de santé des joueurs
         goToNextState()
-
-        // Vérifiez si c'est le tour du joueur ou d'un opposant
-        if (player.value?.id == currentPlayer.value?.id) {
-            // C'est le tour du joueur
-            // Effectuez les actions du joueur ici
-            // Par exemple, lancez les dés et mettez à jour les points de victoire et de santé
-        } else {
-            // C'est le tour d'un opposant
-            // Implémentez la logique de l'opposant ici (par exemple, IA simple)
-            performSimpleAI()
+        var currentPlayerId = _currentPlayer.value?.id
+        if (currentPlayerId != null) {
+            if (currentPlayerId == 4) {
+                currentPlayerId = 0
+            } else {
+                currentPlayerId += 1
+            }
         }
-    }
+        if (_player.value?.id == currentPlayerId) {
+            _currentPlayer.value = _player.value
+        } else {
+            _currentPlayer.value = _opponents.value?.filter{ it.id == currentPlayerId }?.get(0)
+        }
 
-    private fun performSimpleAI() {
-        // Implémentez la logique de l'IA ici (par exemple, faire toujours la même action)
-        // Mettez à jour l'état du jeu en conséquence
-        // Puis appelez endTurn() pour passer au tour suivant
+//        // Vérifiez si c'est le tour du joueur ou d'un opposant
+//        if (player.value?.id == currentPlayer.value?.id) {
+//            // C'est le tour du joueur
+//
+//        } else {
+//            // C'est le tour d'un opposant
+//            performSimpleAI()
+//        }
     }
-
 
 }
