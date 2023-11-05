@@ -40,9 +40,10 @@ data class Player(
 )
 
 data class PlayerModel(
-    val name: String,
     val id: Int,
+    val name: String,
     val characterImageResId: Int,
     val victoryPoints: Int,
-    val healthPoints: Int
+    val healthPoints: Int,
+    val energy: Int
 )

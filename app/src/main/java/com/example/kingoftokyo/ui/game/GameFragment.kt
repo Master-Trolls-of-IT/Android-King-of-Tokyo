@@ -6,11 +6,13 @@ import PlayerCharacter
 import PlayerModel
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
@@ -21,13 +23,18 @@ import com.example.kingoftokyo.R
 import com.example.kingoftokyo.R.*
 import com.example.kingoftokyo.model.Card
 import com.example.kingoftokyo.model.DiceModel
+import com.example.kingoftokyo.model.GameState
 import com.example.kingoftokyo.ui.game.adapter.OpponentAdapter
 
-class GameFragment : Fragment() {
+class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
     private lateinit var viewModel: GameViewModel
     private lateinit var player: PlayerModel
     private lateinit var opponentAdapter: OpponentAdapter
+    private lateinit var diceAdapter: DiceAdapter
+    private lateinit var diceList: List<DiceModel>
     private lateinit var king: PlayerModel
+
+    private var remainingRollsValue: Int = 3
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,7 +43,7 @@ class GameFragment : Fragment() {
         val selectedCharacter = arguments?.getParcelable<PlayerCharacter>("selectedCharacter")
         val playerName = arguments?.getString("playerName")
 
-        player = PlayerModel(playerName!!, selectedCharacter!!.id, selectedCharacter.characterImageResId, 20, 0)
+        player = PlayerModel( selectedCharacter!!.id, playerName!!, selectedCharacter.characterImageResId, 0, 10, 0)
 
         return inflater.inflate(layout.fragment_game, container, false)
     }
@@ -44,8 +51,7 @@ class GameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = GameViewModel(view)
-        viewModel.initCharactersList(player.id)
+        viewModel = GameViewModel(view, player.id)
         opponentAdapter = OpponentAdapter(viewModel.opponents.value!!)
 
         val opponentRecyclerView = view.findViewById<RecyclerView>(R.id.gameboardOpponentCards)
@@ -55,8 +61,13 @@ class GameFragment : Fragment() {
         val playerHPText = view.findViewById<TextView>(R.id.gameboardPlayerHP)
         val playerVPText = view.findViewById<TextView>(R.id.gameboardPlayerVP)
         val playerUsernameText = view.findViewById<TextView>(R.id.gameboardUsername)
+        val playerAvatar = view.findViewById<ImageView>(R.id.playerAvatar)
+
+        val kingAvatar = view.findViewById<ImageView>(R.id.boardgameKing)
+        kingAvatar.setImageResource(viewModel.currentKing.value?.characterImageResId ?: player.characterImageResId)
 
         playerUsernameText.text = player.name
+        playerAvatar.setImageResource(player.characterImageResId)
 
         val rollButton = view.findViewById<Button>(R.id.boardGameRollButton)
         val inventoryButton = view.findViewById<Button>(R.id.boardGameInventoryButton)
@@ -64,8 +75,39 @@ class GameFragment : Fragment() {
         rollButton.setOnClickListener {
             openCustomModal()
         }
+        
         inventoryButton.setOnClickListener{
             openInventoryModal()
+        }
+
+        viewModel.currentState.observe(viewLifecycleOwner) { gamestate ->
+            rollButton.isEnabled = gamestate == GameState.RollDiceState
+            // TODO: activer le bouton d'inventaire uniquement quand c'est la phase d'achat
+            when (gamestate) {
+                GameState.RollDiceState -> {
+                    remainingRollsValue = 3
+                    diceList = listOf(
+                        DiceModel(0, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true),
+                        DiceModel(1, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true),
+                        DiceModel(2, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true),
+                        DiceModel(3, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true),
+                        DiceModel(4, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true),
+                        DiceModel(5, "LoNoSe", R.drawable.face_inconnue, "face_inconnue", true)
+                    )
+                }
+                GameState.ResolveDiceState -> {
+                    val diceResults = viewModel.calculateDiceResults(diceList)
+                    Log.d("results", diceResults.toString())
+                    opponentAdapter.updateOpponents(diceResults!!)
+                    playerHPText.text = viewModel.player.value?.healthPoints.toString()
+                    playerVPText.text = viewModel.player.value?.victoryPoints.toString()
+                    viewModel.endTurn()
+                }
+                GameState.BuyState -> {}
+                GameState.AttackState -> {}
+                GameState.EndTurnState -> {}
+                null -> TODO()
+            }
         }
     }
 
@@ -76,29 +118,34 @@ class GameFragment : Fragment() {
         dialogBuilder.setView(dialogView)
 
         val diceRecyclerView = dialogView.findViewById<RecyclerView>(R.id.diceRecyclerView)
-        val diceAdapter = DiceAdapter(
-            listOf(
-                DiceModel("Croco Die", drawable.croco, "heal"),
-                DiceModel("Croco Die", drawable.croco, "attack"),
-                DiceModel("Croco Die", drawable.croco, "energy"),
-                DiceModel("Croco Die", drawable.croco, "victory1"),
-                DiceModel("Croco Die", drawable.croco, "victory2"),
-                DiceModel("Croco Die", drawable.croco, "victory3")
-            )
-        )
+        diceAdapter = DiceAdapter(diceList, this)
         diceRecyclerView.adapter = diceAdapter
         diceRecyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
 
         val closeButton = dialogView.findViewById<Button>(R.id.closeButton)
+        val rollButton = dialogView.findViewById<Button>(R.id.rollDiceButton)
+        val remainingRolls = dialogView.findViewById<TextView>(R.id.reamainingRollsValue)
+        remainingRolls.text = remainingRollsValue.toString()
         val alertDialog = dialogBuilder.create()
 
         closeButton.setOnClickListener {
+            viewModel.endTurn()
             alertDialog.dismiss()
+        }
+
+        rollButton.setOnClickListener {
+            val diceResults = viewModel.rollDices(diceAdapter.diceList)
+            remainingRollsValue--
+            remainingRolls.text = remainingRollsValue.toString()
+            if (remainingRollsValue == 0) {
+                rollButton.isEnabled = false
+            }
+            diceList = diceResults
+            diceAdapter.updateDice(diceResults)
         }
 
         alertDialog.show()
     }
-
 
     private fun openInventoryModal() {
         val dialogBuilder = AlertDialog.Builder(requireContext())
@@ -132,5 +179,9 @@ class GameFragment : Fragment() {
 
 
         alertDialog.show()
+    }
+
+    override fun onDiceClicked(diceId: Int) {
+        diceAdapter.toggleRollability(diceId)
     }
 }

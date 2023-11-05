@@ -15,6 +15,7 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
+import com.example.kingoftokyo.boilerplate.getPredifinedPlayerCharacter
 import com.example.kingoftokyo.ui.login.adapter.CharacterAdapter
 
 class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
@@ -22,7 +23,7 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
     private lateinit var characterAdapter: CharacterAdapter
     private var lastClickedCharacter: PlayerCharacter? = null // Variable pour stocker le dernier personnage cliqué
     private var playerName: String = "" // Nom par défaut du joueur
-    private val defaultCharacter = PlayerCharacter(0, "Croco Feroce", R.drawable.croco) // Personnage par défaut
+    private lateinit var defaultCharacter : PlayerCharacter // Personnage par défaut
 
     companion object {
         fun newInstance() = LoginFragment()
@@ -40,7 +41,7 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         // Initialize the ViewModel
-        viewModel = LoginViewModel()
+        viewModel = LoginViewModel(view)
 
         // Bind the ViewModel to the view
         val characterRecyclerView = view.findViewById<RecyclerView>(R.id.characterRecyclerView)
@@ -51,6 +52,8 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
         characterAdapter = CharacterAdapter(emptyList(), this)
         characterRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         characterRecyclerView.adapter = characterAdapter
+
+        defaultCharacter = getPredifinedPlayerCharacter(view)[0]
 
         // Observe the LiveData in the ViewModel and update the adapter when data changes
         viewModel.characters.observe(viewLifecycleOwner) { characters ->
@@ -80,13 +83,15 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
                 playerName = enteredName
             }
 
+            Log.d("lastClickedCharacter",lastClickedCharacter.toString())
+
             // check si un personnage a été sélectionné, sinon on attribue le personnage par défaut
             if( lastClickedCharacter == null) {
                 lastClickedCharacter = defaultCharacter
+                playerName = defaultCharacter.name
             }
 
-            Log.d("Debug", "Personnage sélectionné : ${lastClickedCharacter!!.name}")
-            Log.d("Debug", "Nom du joueur : $playerName")
+            Log.d("lastClickedCharacter",lastClickedCharacter.toString())
 
             val bundle = Bundle()
             bundle.putParcelable("selectedCharacter", lastClickedCharacter)
@@ -97,15 +102,8 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
-        // TODO: Use the ViewModel
-    }
-
     override fun onCharacterClicked(character: PlayerCharacter) {
         lastClickedCharacter = character
-        Log.d("Debug", "Personnage cliqué : ${lastClickedCharacter!!.name}")
     }
 
 }
