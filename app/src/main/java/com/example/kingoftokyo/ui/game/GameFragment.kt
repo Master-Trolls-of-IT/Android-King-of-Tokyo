@@ -73,6 +73,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
         viewModel.currentState.observe(viewLifecycleOwner) { gamestate ->
             rollButton.isEnabled = gamestate == GameState.RollDiceState
+            // TODO: activer le bouton d'inventaire uniquement quand c'est la phase d'achat
             when (gamestate) {
                 GameState.RollDiceState -> {
                     remainingRollsValue = 3
