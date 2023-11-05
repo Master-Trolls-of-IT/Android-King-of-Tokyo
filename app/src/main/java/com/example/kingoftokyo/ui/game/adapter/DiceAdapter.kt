@@ -9,6 +9,8 @@ import com.example.kingoftokyo.R
 import com.example.kingoftokyo.model.DiceModel
 
 class DiceAdapter(public var diceList: List<DiceModel>, private val diceClickListener: DiceClickListener) : RecyclerView.Adapter<DiceAdapter.DiceViewHolder>() {
+
+
     class DiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val diceImageView: ImageView = itemView.findViewById(R.id.diceImageView)
     }

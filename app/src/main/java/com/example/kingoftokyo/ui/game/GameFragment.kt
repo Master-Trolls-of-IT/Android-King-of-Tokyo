@@ -48,6 +48,9 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
     private var aiShopOpen = false
     private var aiKingOpen = false
 
+    private lateinit var playerVPText: TextView
+    private lateinit var playerHPText: TextView
+
     private var remainingRollsValue: Int = 3
 
     override fun onCreateView(
@@ -78,8 +81,8 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
         playerCardsRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         playerCardsRecyclerView.adapter = cardSlotAdapter
 
-        val playerHPText = view.findViewById<TextView>(R.id.gameboardPlayerHP)
-        val playerVPText = view.findViewById<TextView>(R.id.gameboardPlayerVP)
+        playerHPText = view.findViewById<TextView>(R.id.gameboardPlayerHP)
+        playerVPText = view.findViewById<TextView>(R.id.gameboardPlayerVP)
         val playerUsernameText = view.findViewById<TextView>(R.id.gameboardUsername)
         val playerAvatar = view.findViewById<ImageView>(R.id.playerAvatar)
 
@@ -213,7 +216,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
         } else if (!aiDiceRolled) {
             viewLifecycleOwner.lifecycleScope.launch  {
                 aiDiceRolled = true
-                delay(1500)
+                delay(700)
                 alertDialog.show()
                 rollButton.isEnabled = false
                 closeButton.isEnabled = false
@@ -227,7 +230,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                 diceList = diceResults
                 diceAdapter.updateDice(diceResults)
 
-                delay(2500)
+                delay(1200)
 
                 diceResults = viewModel.rollDices(diceAdapter.diceList)
                 remainingRollsValue--
@@ -238,7 +241,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                 diceList = diceResults
                 diceAdapter.updateDice(diceResults)
 
-                delay(2500)
+                delay(1200)
 
                 viewModel.goToNextState()
                 alertDialog.dismiss()
@@ -283,7 +286,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
 
                 closeInventoryButton.isEnabled = false
 
-                delay(2500)
+                delay(1500)
                 viewModel.goToNextState()
                 alertDialog.dismiss()
             }
@@ -308,8 +311,10 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
 
         val alertDialog = dialogBuilder.create()
 
-        if (viewModel.canGoOutOfTokyo) {
-            if (viewModel.isKingAI) {
+        Log.d("damages ?", viewModel.isKingTakenDamages.toString())
+
+        if (viewModel.canGoOutOfTokyo || viewModel.isKingTakenDamages) {
+            if (!viewModel.isKingAI) {
                 alertDialog.show()
                 confirmButton.setOnClickListener {
                     viewModel.nextKing()
@@ -329,6 +334,8 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                     delay(1000)
 
                     alertDialog.show()
+
+                    delay(2000)
 
                     val randomValue = Random.nextInt(1, 2)
 
@@ -361,7 +368,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                     .setMessage("Voulez-vous vraiment acheter ${card.name} pour ${card.cost} énergie ?")
                     .setPositiveButton("Oui") { dialog, _ ->
                         dialog.dismiss()
-                        buyCard(card, currentPlayer)
+                        buyCard(card)
                         val energyCount = view?.findViewById<TextView>(R.id.energyCount)
                         energyCount?.text = currentPlayer?.energy.toString()
                         //cardSlotAdapter.updateCards(currentPlayer?.inventory)
@@ -390,27 +397,23 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
         if (currentPlayer.cards.contains(card)) {
             return Pair(false, "Vous avez déjà acheté cette carte.")
         }
-        if (currentPlayer.cards.size >= 3) {
+        if (currentPlayer.cards.count { it.id != 0 } >= 3) {
             return Pair(false, "Vous avez atteint la limite de 3 cartes.")
         }
         return Pair(true, "Aucun message d'erreur")  // Aucune erreur
     }
 
 
-    private fun buyCard(card: Card, currentPlayer: PlayerModel?) {
-        currentPlayer?.let {
-            currentPlayer.energy -= card.cost
-            currentPlayer.cards += card
-
-            cardSlotAdapter.updateCards(currentPlayer.cards)
-            val message = "Vous venez d'acheter ${card.name}"
-            val alertDialog = AlertDialog.Builder(requireContext())
-                .setTitle("Achat effectué")
-                .setMessage(message)
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                .create()
-            alertDialog.show()
-        }
+    private fun buyCard(card: Card) {
+        viewModel.updateCardPlayer(card, isAIPlaying)
+        cardSlotAdapter.updateCards(viewModel.currentPlayer.value?.cards!!)
+        val message = "Vous venez d'acheter ${card.name}"
+        val alertDialog = AlertDialog.Builder(requireContext())
+            .setTitle("Achat effectué")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .create()
+        alertDialog.show()
     }
 
 
@@ -423,5 +426,10 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
         currentCards[cardPosition] = getInitialsCards(requireView())[0]
 
         viewModel.player.value?.copy(cards = currentCards)?.let { viewModel.updatePlayer(it) }
+        cardSlotAdapter.updateCards(viewModel.player.value?.cards!!)
+        opponentAdapter.updateOpponents(viewModel.opponents.value!!)
+
+        playerHPText.text = viewModel.player.value?.healthPoints.toString()
+        playerVPText.text = viewModel.player.value?.victoryPoints.toString()
     }
 }

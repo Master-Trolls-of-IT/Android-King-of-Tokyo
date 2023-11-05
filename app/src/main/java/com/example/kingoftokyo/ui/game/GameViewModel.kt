@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import com.example.kingoftokyo.R
 import com.example.kingoftokyo.boilerplate.getInitialsCards
 import com.example.kingoftokyo.boilerplate.getPredifinedPlayerCharacter
+import com.example.kingoftokyo.model.Card
 import com.example.kingoftokyo.model.DiceModel
 import com.example.kingoftokyo.model.GameState
 import kotlin.random.Random
@@ -114,6 +115,22 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             _currentKing.value = _opponents.value?.find { it.id == currentKingId }
         }
 
+    }
+
+    fun updateCardPlayer(card: Card, isAIPlaying: Boolean) {
+        if (!isAIPlaying) {
+            val currentCards = (player.value?.cards ?: emptyList()).toMutableList()
+            if (currentCards[0].id == 0) {
+                currentCards[0] = card
+            } else if (currentCards[1].id == 0) {
+                currentCards[1] = card
+            } else if (currentCards[2].id == 0) {
+                currentCards[2] = card
+            }
+
+            player.value?.copy(cards = currentCards, energy = player.value?.energy?.minus(card.cost) ?: player.value?.energy!!)?.let { updatePlayer(it) }
+            _currentPlayer.value = player.value
+        }
     }
 
     fun calculateDiceResults(diceResults: List<DiceModel>): List<PlayerModel>? {
@@ -324,7 +341,7 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             PlayerModel(it.id, it.name, it.characterImageResId, if (it.victoryPoints - opponentsMalus > 0) it.victoryPoints - opponentsMalus else 0 , it.healthPoints, it.energy, it.cards)
         }
 
-        player.value?.victoryPoints?.plus(playerBonus)
+        _player.value?.victoryPoints?.plus(playerBonus)
     }
 
     fun stealEnergy(opponentsMalus: Int, playerBonus: Int){
@@ -332,11 +349,13 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints , it.healthPoints, if (it.energy - opponentsMalus > 0) it.energy - opponentsMalus else 0, it.cards)
         }
 
-        player.value?.energy?.plus(playerBonus)
+        _player.value?.energy?.plus(playerBonus)
     }
 
     fun onCardUsed(cardPosition: Int) {
         val usedCard = _player.value?.cards?.get(cardPosition)
+
+        Log.d("CardUsed", usedCard?.name!!)
 
         when (usedCard?.id) {
             0 -> {}
