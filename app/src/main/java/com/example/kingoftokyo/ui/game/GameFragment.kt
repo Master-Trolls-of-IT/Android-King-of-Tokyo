@@ -123,6 +123,9 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
             kingAvatar.setImageResource(viewModel.currentKing.value?.characterImageResId ?: player.characterImageResId)
             skipButton.isEnabled = !isAIPlaying
 
+            if (viewModel.currentPlayer.value?.healthPoints == 0) {
+                viewModel.endTurn()
+            }
 
             viewModel.currentPlayer.value?.id?.let { opponentAdapter.updateCurrentPlayerId(it) }
 
