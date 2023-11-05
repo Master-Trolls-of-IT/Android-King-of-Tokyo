@@ -3,7 +3,7 @@
     <string-array name="predefined_cards">
         <item>1, Éruption Volcanique, @drawable/crown, Infligez 3 points de dégâts à tous les adversaires., 7, attack, 3</item>
         <item>2, Invasion Extraterrestre, @drawable/crown, Volez 2 points d énergie à chaque adversaire., 8, energy, 2</item>
-        <item>3, Métamorphose Monstrueuse, @drawable/crown, Transformez-vous en une forme monstrueuse, gagnant +3 points d attaque pour le reste du tour., 7, attack, 3</item>
+        <item>3, Métamorphose Monstrueuse, @drawable/crown, Transformez-vous en une forme monstrueuse gagnant +3 points d attaque pour le reste du tour., 7, attack, 3</item>
         <item>4, Souffle Glacial, @drawable/crown, Infligez 2 points de dégâts à tous les adversaires., 4, attack, 2</item>
         <item>5, Super Vitesse, @drawable/crown, Vous pouvez quitter Tokyo ou y entrer sans subir de dégâts., 7, energy, 0</item>
         <item>6, Invisibilité, @drawable/crown, Vous êtes immunisé contre toutes les attaques ce tour., 7, heal, 0</item>

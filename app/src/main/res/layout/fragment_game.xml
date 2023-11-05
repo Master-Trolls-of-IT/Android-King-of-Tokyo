@@ -21,7 +21,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/gameboardOpponentCards"
-            app:layout_constraintWidth_percent="0.8"
+            app:layout_constraintWidth_percent="0.7"
             app:srcCompat="@drawable/city" />
 
         <ImageView
@@ -119,12 +119,12 @@
             android:id="@+id/boardGameSpellCard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="15dp"
             android:layout_marginBottom="10dp"
             app:layout_constraintBottom_toTopOf="@+id/boardGameRollButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/boardgameCityMap" />
+            app:layout_constraintTop_toBottomOf="@+id/gamestate" />
 
         <TextView
             android:id="@+id/gameboardUsername"
@@ -151,6 +151,27 @@
             app:layout_constraintHorizontal_bias="0.868"
             app:layout_constraintStart_toEndOf="@+id/gameboardPlayerVP"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/skipButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Passer"
+            app:layout_constraintEnd_toStartOf="@+id/boardGameRollButton"
+            app:layout_constraintStart_toEndOf="@+id/boardGameInventoryButton"
+            app:layout_constraintTop_toTopOf="@+id/boardGameInventoryButton" />
+
+        <TextView
+            android:id="@+id/gamestate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="TextView"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/boardgameCityMap" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

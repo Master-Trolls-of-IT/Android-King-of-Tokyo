@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.kingoftokyo.R
 import com.example.kingoftokyo.R.*
+import com.example.kingoftokyo.boilerplate.getGameState
 import com.example.kingoftokyo.boilerplate.getInitialsCards
 import com.example.kingoftokyo.boilerplate.getPredifinedCards
 import com.example.kingoftokyo.model.Card
@@ -79,6 +80,8 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
         val playerUsernameText = view.findViewById<TextView>(R.id.gameboardUsername)
         val playerAvatar = view.findViewById<ImageView>(R.id.playerAvatar)
 
+        val gameStateView = view.findViewById<TextView>(R.id.gamestate)
+
         val kingAvatar = view.findViewById<ImageView>(R.id.boardgameKing)
         kingAvatar.setImageResource(viewModel.currentKing.value?.characterImageResId ?: player.characterImageResId)
 
@@ -87,6 +90,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
         val rollButton = view.findViewById<Button>(R.id.boardGameRollButton)
         val inventoryButton = view.findViewById<Button>(R.id.boardGameInventoryButton)
+        val skipButton = view.findViewById<Button>(R.id.skipButton)
 
         rollButton.setOnClickListener {
             openCustomModal()
@@ -96,22 +100,30 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
             openInventoryModal()
         }
 
+        skipButton.setOnClickListener {
+            viewModel.goToNextState()
+        }
+
         viewModel.currentState.observe(viewLifecycleOwner) { gamestate ->
+            gameStateView.text = getGameState(gamestate)
             isAIPlaying = viewModel.currentPlayer.value?.id != viewModel.player.value?.id
 
             rollButton.isEnabled = (gamestate == GameState.RollDiceState) && !isAIPlaying
-            Log.d("currentplayer", viewModel.currentPlayer.value?.name.toString())
-            Log.d("gameState", gamestate.toString())
-            Log.d("isRollEnabled", rollButton.isEnabled.toString())
             inventoryButton.isEnabled = (gamestate == GameState.BuyState) && !isAIPlaying
+//            skipButton.isEnabled = !isAIPlaying
 
             viewModel.currentPlayer.value?.id?.let { opponentAdapter.updateCurrentPlayerId(it) }
+
+            Log.d("ActualPlayer: ", viewModel.currentPlayer.value?.name.toString())
+            Log.d("ActualGameState: ", gamestate.toString())
 
             if (!isAIPlaying) {
                 val borderDrawable = ContextCompat.getDrawable(view.context, R.drawable.border)
                 val layers = arrayOf(playerAvatar.drawable, borderDrawable)
                 val layerDrawable = LayerDrawable(layers)
                 playerAvatar.setImageDrawable(layerDrawable)
+            } else {
+                playerAvatar.setImageResource(player.characterImageResId)
             }
             when (gamestate) {
                 GameState.RollDiceState -> {
@@ -131,21 +143,16 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
                 }
                 GameState.ResolveDiceState -> {
                     val diceResults = viewModel.calculateDiceResults(diceList)
-                    Log.d("results", diceResults.toString())
                     opponentAdapter.updateOpponents(diceResults!!)
                     playerHPText.text = viewModel.player.value?.healthPoints.toString()
                     playerVPText.text = viewModel.player.value?.victoryPoints.toString()
                     viewModel.goToNextState()
                 }
                 GameState.BuyState -> {
-                    if (isAIPlaying) {
-                        viewModel.goToNextState()
-                    }
+
                 }
                 GameState.AttackState -> {
-                    if (isAIPlaying) {
-                        viewModel.goToNextState()
-                    }
+
                 }
                 GameState.EndTurnState -> {
                    viewModel.endTurn()
@@ -174,7 +181,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
         if (!isAIPlaying) {
             closeButton.setOnClickListener {
-                viewModel.endTurn()
+                viewModel.goToNextState()
                 alertDialog.dismiss()
             }
 
@@ -238,20 +245,25 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener {
 
         val inventoryRecyclerView =
             inventoryView.findViewById<RecyclerView>(R.id.inventoryRecyclerView)
+        val energyCount = inventoryView.findViewById<TextView>(R.id.energyCount)
         val cardAdapter = CardAdapter(getPredifinedCards(requireView()))
 
         inventoryRecyclerView.adapter = cardAdapter
         inventoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+
+        energyCount.text = viewModel.currentPlayer.value?.energy.toString()
 
         val closeInventoryButton = inventoryView.findViewById<Button>(R.id.closeInventoryButton)
 
         val alertDialog = dialogBuilder.create()
         closeInventoryButton.setOnClickListener {
             alertDialog.dismiss()
+            viewModel.goToNextState()
         }
 
 
         alertDialog.show()
+
     }
 
     override fun onDiceClicked(diceId: Int) {

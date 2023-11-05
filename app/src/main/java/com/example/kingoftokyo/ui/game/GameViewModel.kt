@@ -197,8 +197,6 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
             victoryCount += victory2Count * 2
             victoryCount += victory1Count
             _opponents.value = _opponents.value?.map {
-                Log.d("player id3", _player.value?.id.toString())
-                Log.d("current id",currentPlayer.value?.id.toString())
                 if (it.id == currentPlayer.value?.id) PlayerModel(it.id, it.name, it.characterImageResId, it.victoryPoints + victoryCount, it.healthPoints, it.energy + 1, it.cards)
                 else it
             }
@@ -238,29 +236,24 @@ class GameViewModel(private var view: View,private var selectedPlayerId: Int): V
     }
 
     fun endTurn() {
-        goToNextState()
-        var currentPlayerId = _currentPlayer.value?.id
-        if (currentPlayerId != null) {
-            if (currentPlayerId == 4) {
-                currentPlayerId = 0
-            } else {
-                currentPlayerId += 1
-            }
+
+        var currentPlayerId = _currentPlayer.value?.id ?: 1
+        Log.d("endTurn currentPlayerId", currentPlayerId.toString())
+        currentPlayerId = currentPlayerId + 1
+        if (currentPlayerId == 5){
+            currentPlayerId = 1
         }
+        Log.d("endTurn NewcurrentPlayerId", currentPlayerId.toString())
         if (_player.value?.id == currentPlayerId) {
+            Log.d("isNewPlayer player", "yes")
             _currentPlayer.value = _player.value
         } else {
-            _currentPlayer.value = _opponents.value?.filter{ it.id == currentPlayerId }?.get(0)
+            Log.d("isNewPlayer player", "Nop")
+            _currentPlayer.value = _opponents.value?.find { it.id == currentPlayerId }
+            Log.d("final opponent", _currentPlayer.value?.id.toString())
         }
-
-//        // Vérifiez si c'est le tour du joueur ou d'un opposant
-//        if (player.value?.id == currentPlayer.value?.id) {
-//            // C'est le tour du joueur
-//
-//        } else {
-//            // C'est le tour d'un opposant
-//            performSimpleAI()
-//        }
+        goToNextState()
     }
+
 
 }
