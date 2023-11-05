@@ -35,7 +35,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.CardSlotClickListener {
+class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCardClickListener, CardSlotAdpater.CardSlotClickListener {
     private lateinit var viewModel: GameViewModel
     private lateinit var player: PlayerModel
     private lateinit var opponentAdapter: OpponentAdapter
@@ -44,6 +44,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
     private lateinit var diceList: List<DiceModel>
     private var isAIPlaying: Boolean = false
     private var aiDiceRolled = false
+    private var cardList: List<Card> = emptyList()
     private var aiShopOpen = false
     private var aiKingOpen = false
 
@@ -93,6 +94,9 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
         val rollButton = view.findViewById<Button>(R.id.boardGameRollButton)
         val inventoryButton = view.findViewById<Button>(R.id.boardGameInventoryButton)
         val skipButton = view.findViewById<Button>(R.id.skipButton)
+
+
+        cardList = getPredifinedCards(requireView())
 
         rollButton.setOnClickListener {
             openCustomModal()
@@ -240,11 +244,9 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
                 alertDialog.dismiss()
             }
         }
-
-
-
-
     }
+
+
 
     private fun openInventoryModal() {
         val dialogBuilder = AlertDialog.Builder(requireContext())
@@ -255,7 +257,7 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
         val inventoryRecyclerView =
             inventoryView.findViewById<RecyclerView>(R.id.inventoryRecyclerView)
         val energyCount = inventoryView.findViewById<TextView>(R.id.energyCount)
-        val cardAdapter = CardAdapter(getPredifinedCards(requireView()))
+        val cardAdapter = CardAdapter(cardList, this)
 
         inventoryRecyclerView.adapter = cardAdapter
         inventoryRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -263,6 +265,8 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
         energyCount.text = viewModel.currentPlayer.value?.energy.toString()
 
         val closeInventoryButton = inventoryView.findViewById<Button>(R.id.closeInventoryButton)
+        val buyCardButton = inventoryView.findViewById<Button>(R.id.BuyButton)
+
 
         val alertDialog = dialogBuilder.create()
         if (!isAIPlaying) {
@@ -340,15 +344,76 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardSlotAdpater.
             viewModel.endTurn()
         }
 
-
-
-
-
     }
 
     override fun onDiceClicked(diceId: Int) {
         diceAdapter.toggleRollability(diceId)
     }
+
+    override fun onCardClicked(cardId: Int) {
+        val card = cardList.find { it.id == cardId }
+        if (card != null) {
+            val currentPlayer = viewModel.currentPlayer.value
+            val (canBuy, errorMessage) = canBuyCard(card, currentPlayer)
+            if (canBuy) {
+                val confirmationDialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Confirmation d'achat")
+                    .setMessage("Voulez-vous vraiment acheter ${card.name} pour ${card.cost} énergie ?")
+                    .setPositiveButton("Oui") { dialog, _ ->
+                        dialog.dismiss()
+                        buyCard(card, currentPlayer)
+                        val energyCount = view?.findViewById<TextView>(R.id.energyCount)
+                        energyCount?.text = currentPlayer?.energy.toString()
+                        //cardSlotAdapter.updateCards(currentPlayer?.inventory)
+                    }
+                    .setNegativeButton("Annuler") { dialog, _ -> dialog.dismiss() }
+                    .create()
+                confirmationDialog.show()
+            } else {
+                val alertDialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Erreur d'achat")
+                    .setMessage(errorMessage)
+                    .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                    .create()
+                alertDialog.show()
+            }
+        }
+    }
+
+    private fun canBuyCard(card: Card, currentPlayer: PlayerModel?): Pair<Boolean, String> {
+        if (currentPlayer == null) {
+            return Pair(false, "Le joueur n'est pas défini.")
+        }
+        if (currentPlayer.energy < card.cost) {
+            return Pair(false, "Vous n'avez pas suffisamment d'énergie pour acheter cette carte. Il vous manque : ${card.cost - currentPlayer.energy} énergie.")
+        }
+        if (currentPlayer.cards.contains(card)) {
+            return Pair(false, "Vous avez déjà acheté cette carte.")
+        }
+        if (currentPlayer.cards.size >= 3) {
+            return Pair(false, "Vous avez atteint la limite de 3 cartes.")
+        }
+        return Pair(true, "Aucun message d'erreur")  // Aucune erreur
+    }
+
+
+    private fun buyCard(card: Card, currentPlayer: PlayerModel?) {
+        currentPlayer?.let {
+            currentPlayer.energy -= card.cost
+            currentPlayer.cards += card
+
+            cardSlotAdapter.updateCards(currentPlayer.cards)
+            val message = "Vous venez d'acheter ${card.name}"
+            val alertDialog = AlertDialog.Builder(requireContext())
+                .setTitle("Achat effectué")
+                .setMessage(message)
+                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                .create()
+            alertDialog.show()
+        }
+    }
+
+
 
     override fun onSlotCardClick(cardPosition: Int) {
         viewModel.onCardUsed(cardPosition)

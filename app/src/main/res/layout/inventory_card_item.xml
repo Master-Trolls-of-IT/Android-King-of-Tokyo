@@ -34,12 +34,13 @@
             android:id="@+id/TextCostCard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:elegantTextHeight="false"
+            android:gravity="center"
             android:text=""
+            android:textColor="#89FF00"
             android:textSize="34sp"
             android:textStyle="bold"
-            android:gravity="center"
-            android:layout_gravity="center"
             app:layout_constraintStart_toStartOf="@+id/cardImageView"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,7 +54,11 @@
             android:layout_gravity="center"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardImageView" />
+            app:layout_constraintTop_toBottomOf="@+id/cardImageView"
+            android:ellipsize="end"
+            android:maxWidth="110dp"
+            android:maxLines="2"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
