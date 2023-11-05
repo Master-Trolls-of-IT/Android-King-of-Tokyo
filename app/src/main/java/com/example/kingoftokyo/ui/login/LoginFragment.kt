@@ -47,6 +47,8 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
         val characterRecyclerView = view.findViewById<RecyclerView>(R.id.characterRecyclerView)
         val playerNameEditText = view.findViewById<EditText>(R.id.playerNameEditText)
         val playButton = view.findViewById<Button>(R.id.playButton)
+        val rulesButton = view.findViewById<Button>(R.id.rulesButton)
+
 
         // Set up the RecyclerView and CharacterAdapter
         characterAdapter = CharacterAdapter(emptyList(), this)
@@ -99,6 +101,11 @@ class LoginFragment : Fragment(), CharacterAdapter.CharacterClickListener {
 
             val navController = Navigation.findNavController(requireView())
             navController.navigate(R.id.action_loginFragment2_to_gameFragment2, bundle)
+        }
+
+        rulesButton.setOnClickListener {
+            val navController = Navigation.findNavController(requireView())
+            navController.navigate(R.id.action_loginFragment2_to_rulesFragment)
         }
     }
 

@@ -59,6 +59,15 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:text="Jouer"
             tools:ignore="VisualLintButtonSize" />
+        <Button
+        android:id="@+id/rulesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/playButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="Règles"
+        tools:ignore="VisualLintButtonSize" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
