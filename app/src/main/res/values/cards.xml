@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="predefined_cards">
-        <item>1, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>2, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>3, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>4, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>5, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>6, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>7, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>8, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>9, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
-        <item>10, Card 1, @drawable/croco, Gagne 3 PV, 1, type, effect</item>
+        <item>1, Éruption Volcanique, @drawable/crown, Infligez 3 points de dégâts à tous les adversaires., 7, attack, 3</item>
+        <item>2, Invasion Extraterrestre, @drawable/crown, Volez 2 points d énergie à chaque adversaire., 8, energy, 2</item>
+        <item>3, Métamorphose Monstrueuse, @drawable/crown, Transformez-vous en une forme monstrueuse, gagnant +3 points d attaque pour le reste du tour., 7, attack, 3</item>
+        <item>4, Souffle Glacial, @drawable/crown, Infligez 2 points de dégâts à tous les adversaires., 4, attack, 2</item>
+        <item>5, Super Vitesse, @drawable/crown, Vous pouvez quitter Tokyo ou y entrer sans subir de dégâts., 7, energy, 0</item>
+        <item>6, Invisibilité, @drawable/crown, Vous êtes immunisé contre toutes les attaques ce tour., 7, heal, 0</item>
+        <item>7, Siphon d Énergie, @drawable/crown, Gagnez 3 points d énergie., 4, energy, 3</item>
+        <item>8, Siphon de victoire, @drawable/crown, Tout le monde sauf vous repart à 0 point de victoire, 10, energy, 0</item>
+        <item>9, Météore Dévastateur, @drawable/crown, Infligez 5 points de dégâts à tous les adversaires., 10, attack, 5</item>
+        <item>10, Super Régénération, @drawable/crown, Récupérez 4 points de vie à la fin de votre tour., 6, heal, 4</item>
+        <item>11, Gain de Points de Victoire, @drawable/crown, Gagner 2 points de victoire., 3, victory, 2</item>
+        <item>12, Régénération Instantanée, @drawable/crown, Récupérez 3 points de vie à la fin de votre tour., 6, heal, 3</item>
+        <item>13, Emprise Surnaturelle, @drawable/crown, Siphonnez 2 points de victoire à tous les adversaires et gagnez 2 points de vie., 10, victory, -2</item>
+        <item>14, Drain d Énergie, @drawable/crown, Volez 1 point de victoire à chaque adversaire et récupérez 2 points de vie., 8, heal, 2</item>
+        <item>15, Guérison Totale, @drawable/crown, Récupérez tous vos points de vie et gagnez 1 point de victoire., 10, heal, 0</item>
     </string-array>
     <string name="initial_card">0, , @drawable/empty_card, , , , </string>
 </resources>

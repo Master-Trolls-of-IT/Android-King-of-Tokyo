@@ -7,5 +7,5 @@ data class Card (
     val description: String,
     val cost: Int,
     val type: String,
-    val effect: String
+    val effect: Int
 )
