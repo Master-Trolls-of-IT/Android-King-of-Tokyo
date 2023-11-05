@@ -131,7 +131,6 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
             if (viewModel.player.value?.victoryPoints == 20) {
                 val bundle = Bundle()
                 bundle.putString("winner_name", viewModel.player.value?.name!!)
-                bundle.putInt("winner_imageId", viewModel.player.value?.characterImageResId!!)
                 val navController = Navigation.findNavController(requireView())
                 navController.navigate(R.id.action_gameFragment2_to_winFragment2, bundle)
             }
@@ -140,7 +139,6 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                 val bundle = Bundle()
                 var winner = viewModel.opponents.value?.find { it.victoryPoints == 20 }
                 bundle.putString("winner_name", winner?.name!!)
-                bundle.putInt("winner_imageId", winner?.characterImageResId!!)
                 val navController = Navigation.findNavController(requireView())
                 navController.navigate(R.id.action_gameFragment2_to_winFragment2, bundle)
             }

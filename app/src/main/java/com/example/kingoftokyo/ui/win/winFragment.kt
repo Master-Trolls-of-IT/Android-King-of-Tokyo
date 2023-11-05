@@ -17,14 +17,13 @@ class WinFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         var winnerName = arguments?.getString("winner_name")
-        var winnerImage = arguments?.getInt("winner_imageId")
         val view = inflater.inflate(R.layout.fragment_win, container, false)
 
         val winTextView = view.findViewById<TextView>(R.id.winTexteView)
         winTextView.text = "Félicitations, vous avez gagné !   " + winnerName
 
         val winImageView = view.findViewById<ImageView>(R.id.winnerImage)
-        winImageView.setImageResource(winnerImage!!)
+        winImageView.setImageResource(R.drawable.panda)
 
         val returnToMenuButton = view.findViewById<Button>(R.id.ReturnToMenuButton)
 
