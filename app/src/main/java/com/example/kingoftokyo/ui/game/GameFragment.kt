@@ -127,6 +127,14 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                 viewModel.endTurn()
             }
 
+            if (viewModel.player.value?.victoryPoints == 20) {
+
+            }
+
+            if (viewModel.opponents.value?.find { it.victoryPoints == 20 } != null) {
+
+            }
+
             viewModel.currentPlayer.value?.id?.let { opponentAdapter.updateCurrentPlayerId(it) }
 
 
