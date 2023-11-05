@@ -276,7 +276,8 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
         val card = cardList.find { it.id == cardId }
         if (card != null) {
             val currentPlayer = viewModel.currentPlayer.value
-            if (canBuyCard(card, currentPlayer)) {
+            val (canBuy, errorMessage) = canBuyCard(card, currentPlayer)
+            if (canBuy) {
                 val confirmationDialog = AlertDialog.Builder(requireContext())
                     .setTitle("Confirmation d'achat")
                     .setMessage("Voulez-vous vraiment acheter ${card.name} pour ${card.cost} énergie ?")
@@ -291,10 +292,9 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
                     .create()
                 confirmationDialog.show()
             } else {
-                val message = "Vous n'avez pas suffisamment d'énergie pour acheter cette carte., il vous manque : ${card.cost - (currentPlayer!!.energy)} énergie"
                 val alertDialog = AlertDialog.Builder(requireContext())
                     .setTitle("Erreur d'achat")
-                    .setMessage(message)
+                    .setMessage(errorMessage)
                     .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                     .create()
                 alertDialog.show()
@@ -302,14 +302,29 @@ class GameFragment : Fragment(), DiceAdapter.DiceClickListener, CardAdapter.OnCa
         }
     }
 
-    private fun canBuyCard(card: Card, currentPlayer: PlayerModel?): Boolean {
-        return currentPlayer != null && currentPlayer.energy >= card.cost
+    private fun canBuyCard(card: Card, currentPlayer: PlayerModel?): Pair<Boolean, String> {
+        if (currentPlayer == null) {
+            return Pair(false, "Le joueur n'est pas défini.")
+        }
+        if (currentPlayer.energy < card.cost) {
+            return Pair(false, "Vous n'avez pas suffisamment d'énergie pour acheter cette carte. Il vous manque : ${card.cost - currentPlayer.energy} énergie.")
+        }
+        if (currentPlayer.cards.contains(card)) {
+            return Pair(false, "Vous avez déjà acheté cette carte.")
+        }
+        if (currentPlayer.cards.size >= 3) {
+            return Pair(false, "Vous avez atteint la limite de 3 cartes.")
+        }
+        return Pair(true, "Aucun message d'erreur")  // Aucune erreur
     }
+
 
     private fun buyCard(card: Card, currentPlayer: PlayerModel?) {
         currentPlayer?.let {
-            it.energy -= card.cost
-           // it.inventory.add(card)
+            currentPlayer.energy -= card.cost
+            currentPlayer.cards += card
+
+            cardSlotAdapter.updateCards(currentPlayer.cards)
             val message = "Vous venez d'acheter ${card.name}"
             val alertDialog = AlertDialog.Builder(requireContext())
                 .setTitle("Achat effectué")
